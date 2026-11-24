@@ -14,7 +14,7 @@
 <link rel="icon" type="image/png" href="art/favicon-32.png">
 <link rel="apple-touch-icon" href="art/apple-touch-icon.png">
 <link rel="preload" href="fonts/PressStart2P-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="paper.css">
+<link rel="stylesheet" href="paper.css?v=3">
 </head>
 <body>
 
@@ -23,6 +23,28 @@
   <span>ODAROO &amp; CO.</span><span>SIX CARTRIDGES</span><span>NOTHING TO INSTALL</span><span>PLAYS IN YOUR BROWSER</span><span>PHONE · DESKTOP · CONTROLLER · VR</span><span>EVERY GAME AN ORIGINAL</span>
   <span>ODAROO &amp; CO.</span><span>SIX CARTRIDGES</span><span>NOTHING TO INSTALL</span><span>PLAYS IN YOUR BROWSER</span><span>PHONE · DESKTOP · CONTROLLER · VR</span><span>EVERY GAME AN ORIGINAL</span>
 </div></div>
+
+<!-- ───────── THE BAR THAT STAYS ON TOP: logo left, QR right ───────── -->
+<nav class="topbar" aria-label="Sections">
+  <a class="tb-logo" href="#top" aria-label="Odaroo &amp; Co., back to the top">
+    <span class="logo sm" aria-hidden="true"><span class="tile inv">O</span><span class="tile">D</span><span class="tile">A</span><span class="tile">R</span><span class="tile inv">O</span><span class="tile">O</span><span class="tile">&amp;</span><span class="tile">C</span><span class="tile inv">O<i>.</i></span></span>
+    <b>ODAROO &amp; CO.</b>
+  </a>
+  <div class="tb-links">
+    <a href="#scene" style="--c:#ffd23f">Scene</a>
+    <a href="#inkville" style="--c:#ffd76a">Inkville</a>
+    <a href="#lunatide" style="--c:#7fd4ff">Lunatide</a>
+    <a href="#vrlabs" style="--c:#b79bff">VR Labs</a>
+    <a href="#lusolaos" style="--c:#7fb0ff">Lusolaos</a>
+    <a href="#chromeanimals" style="--c:#ff2a6d">Chrome Animals</a>
+    <a href="#edgework" style="--c:#e1061b">Edgework</a>
+  </div>
+  <a class="qr" href="https://odaroo.co/" aria-label="QR code: scan to open odaroo.co">
+    <img src="art/qr.svg" width="58" height="58" alt="">
+    <span class="qr-big" aria-hidden="true"><img src="art/qr.svg" width="200" height="200" alt=""><b>SCAN ME</b><i>odaroo.co</i></span>
+  </a>
+  <span class="tb-bar" aria-hidden="true"></span>
+</nav>
 
 <button id="snd" type="button" aria-label="Music off" title="Music: Odaroo, Catchphrases and Misunderstandings">
   <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -59,21 +81,22 @@
     <div class="cols">
       <p class="dropcap">Welcome to the paper. Around here a release is a cartridge, and there are six on the rack: a 1930s cartoon card rumble, a dream-wind platformer, a lab you walk into with a headset on, a river of painted tiles, a neon-noir one-hit-kill, and a blade puzzle that needs both of your hands and possibly a friend.</p>
       <p>Nothing needs a download, a launcher or an account. Pick a cartridge, press PLAY, and it starts. Phones, desktops, controllers and VR headsets are all welcome.</p>
-      <p>This issue opens with the scene (the videos, the stream, the music and the Discord) and then walks the whole rack, one cartridge at a time. Scroll slowly. The cartridges turn as you go.</p>
+      <p>This issue opens with the scene (the videos, the stream, the music and the Discord) and then walks the whole rack, one cartridge at a time. Scroll slowly. The cartridges turn as you go, and the bar on top jumps anywhere.</p>
     </div>
     <p class="cta-row"><a class="btn" href="#rack">Go to the rack <span aria-hidden="true">▶</span></a> <a class="btn ghost" href="https://play.odaroo.co/">Open the arcade</a></p>
+    <p class="cue" aria-hidden="true">Scroll <span>&#9660;</span></p>
   </div>
 
   <aside class="contents">
-    <h3 class="boxhead">In this issue</h3>
+    <h3 class="boxhead">Jump to</h3>
     <ol>
-      <li><a href="#scene"><b>The Scene</b><i>YouTube, Twitch, Bandcamp, Discord</i><u>02</u></a></li>
-      <li><a href="#inkville"><b>Inkville</b><i>A rubberhose rumble</i><u>03</u></a></li>
-      <li><a href="#lunatide"><b>Lunatide</b><i>Under a tidal moon</i><u>04</u></a></li>
-      <li><a href="#vrlabs"><b>VR Labs</b><i>Put on a headset</i><u>05</u></a></li>
-      <li><a href="#lusolaos"><b>Lusolaos</b><i>A river of painted tiles</i><u>06</u></a></li>
-      <li><a href="#chromeanimals"><b>Chrome Animals</b><i>One hit kills</i><u>07</u></a></li>
-      <li><a href="#edgework"><b>Edgework</b><i>Never touch an edge</i><u>08</u></a></li>
+      <li><a href="#scene"><b>The Scene</b><i>YouTube, Twitch, Bandcamp, Discord</i></a></li>
+      <li><a href="#inkville"><b>Inkville</b><i>A rubberhose rumble</i></a></li>
+      <li><a href="#lunatide"><b>Lunatide</b><i>Under a tidal moon</i></a></li>
+      <li><a href="#vrlabs"><b>VR Labs</b><i>Put on a headset</i></a></li>
+      <li><a href="#lusolaos"><b>Lusolaos</b><i>A river of painted tiles</i></a></li>
+      <li><a href="#chromeanimals"><b>Chrome Animals</b><i>One hit kills</i></a></li>
+      <li><a href="#edgework"><b>Edgework</b><i>Never touch an edge</i></a></li>
     </ol>
     <div class="rack" aria-label="The cartridges">
       <a href="#inkville" class="cartstage mini"><div class="cart3d" data-slug="inkville" data-title="INKVILLE" style="--c:#ffd76a" data-ry="-28"></div></a>
@@ -88,7 +111,7 @@
 
 <!-- ───────── THE SCENE: the artist's pages ───────── -->
 <section class="scene" id="scene">
-  <div class="banner"><span class="pg">02</span><h2>The Scene</h2><p>Where Odaroo records, films, talks and plays</p></div>
+  <div class="banner"><h2>The Scene</h2><p>Where Odaroo records, films, talks and plays</p></div>
 
   <div class="scene-grid">
     <a class="chan" href="https://www.youtube.com/@whoisodaroo" style="--c:#e62117" rel="noopener">
@@ -134,9 +157,9 @@
 </section>
 
 <!-- ───────── THE RACK ───────── -->
-<div class="banner big" id="rack"><span class="pg">★</span><h2>The Rack</h2><p>Six cartridges, made by Odaroo. Start at the top.</p></div>
+<div class="banner big" id="rack"><h2>The Rack</h2><p>Six cartridges, made by Odaroo. Start at the top.</p></div>
 
-<!-- 03 INKVILLE -->
+<!-- INKVILLE -->
 <article class="spread" id="inkville" style="--c:#ffd76a;--cd:#b8860b">
   <div class="spread-cart">
     <div class="cartstage"><div class="cart3d" data-slug="inkville" data-title="INKVILLE" data-scroll></div></div>
@@ -149,7 +172,7 @@
     </dl>
   </div>
   <div class="spread-body">
-    <p class="folio"><span>03</span> Card battler · Arcade collection</p>
+    <p class="folio">Card battler · Arcade collection</p>
     <h2 class="title">Inkville</h2>
     <p class="deck">A rubberhose rumble. Collect the acts, play the arcade, battle online.</p>
     <div class="cols">
@@ -168,7 +191,9 @@
   </div>
 </article>
 
-<!-- 04 LUNATIDE -->
+<div class="zip" data-dir="1" aria-hidden="true"><span>NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> </span></div>
+
+<!-- LUNATIDE -->
 <article class="spread flip-side" id="lunatide" style="--c:#7fd4ff;--cd:#1c6fa8">
   <div class="spread-cart">
     <div class="cartstage"><div class="cart3d" data-slug="lunatide" data-title="LUNATIDE" data-scroll></div></div>
@@ -181,7 +206,7 @@
     </dl>
   </div>
   <div class="spread-body">
-    <p class="folio"><span>04</span> 2.5D platformer</p>
+    <p class="folio">2.5D platformer</p>
     <h2 class="title">Lunatide</h2>
     <p class="deck">A dream-wind platformer under a tidal moon.</p>
     <div class="cols">
@@ -207,7 +232,7 @@
 <!-- THE VR WING -->
 <div class="wing"><span>The VR wing</span><i>Two cartridges that go on your head</i></div>
 
-<!-- 05 VR LABS -->
+<!-- VR LABS -->
 <article class="spread" id="vrlabs" style="--c:#b79bff;--cd:#5b3fc4">
   <div class="spread-cart">
     <div class="cartstage"><div class="cart3d" data-slug="vrlabs" data-title="VR LABS" data-scroll></div></div>
@@ -220,7 +245,7 @@
     </dl>
   </div>
   <div class="spread-body">
-    <p class="folio"><span>05</span> Virtual reality · WebXR</p>
+    <p class="folio">Virtual reality · WebXR</p>
     <h2 class="title">VR Labs</h2>
     <p class="deck">Put on a headset: a lab of VR games you pick up with your hands.</p>
     <div class="cols">
@@ -237,7 +262,9 @@
   </div>
 </article>
 
-<!-- 06 LUSOLAOS -->
+<div class="zip" data-dir="-1" aria-hidden="true"><span>NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> </span></div>
+
+<!-- LUSOLAOS -->
 <article class="spread flip-side" id="lusolaos" style="--c:#7fb0ff;--cd:#1f4fa3">
   <div class="spread-cart">
     <div class="cartstage"><div class="cart3d" data-slug="lusolaos" data-title="LUSOLAOS" data-scroll></div></div>
@@ -250,7 +277,7 @@
     </dl>
   </div>
   <div class="spread-body">
-    <p class="folio"><span>06</span> Puzzle · VR and AR inside</p>
+    <p class="folio">Puzzle · VR and AR inside</p>
     <h2 class="title">Lusolaos</h2>
     <p class="deck">A river of painted tiles, from the Atlantic to the Mekong. Turn, swap, breathe.</p>
     <div class="cols">
@@ -269,7 +296,9 @@
   </div>
 </article>
 
-<!-- 07 CHROME ANIMALS -->
+<div class="zip" data-dir="1" aria-hidden="true"><span>NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> </span></div>
+
+<!-- CHROME ANIMALS -->
 <article class="spread dark" id="chromeanimals" style="--c:#ff2a6d;--cd:#ff2a6d">
   <div class="spread-cart">
     <div class="cartstage"><div class="cart3d" data-slug="chromeanimals" data-title="CHROME" data-scroll></div></div>
@@ -282,7 +311,7 @@
     </dl>
   </div>
   <div class="spread-body">
-    <p class="folio"><span>07</span> Top-down action · Adults only</p>
+    <p class="folio">Top-down action · Adults only</p>
     <h2 class="title">Chrome Animals</h2>
     <p class="deck">A neon-noir massacre. One hit kills. Pick a mask.</p>
     <div class="cols">
@@ -299,7 +328,9 @@
   </div>
 </article>
 
-<!-- 08 EDGEWORK -->
+<div class="zip" data-dir="-1" aria-hidden="true"><span>LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> </span></div>
+
+<!-- EDGEWORK -->
 <article class="spread dark flip-side" id="edgework" style="--c:#e1061b;--cd:#ff3b4d">
   <div class="spread-cart">
     <div class="cartstage"><div class="cart3d" data-slug="edgework" data-title="EDGEWORK" data-scroll></div></div>
@@ -312,7 +343,7 @@
     </dl>
   </div>
   <div class="spread-body">
-    <p class="folio"><span>08</span> Puzzle · Speedrun</p>
+    <p class="folio">Puzzle · Speedrun</p>
     <h2 class="title">Edgework <span lang="ja">刃渡り</span></h2>
     <p class="deck">Eight nights of thin blades over a red seal. Never touch an edge.</p>
     <div class="cols">
@@ -330,6 +361,8 @@
     </div>
   </div>
 </article>
+
+<div class="zip" data-dir="1" aria-hidden="true"><span>THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> </span></div>
 
 <!-- ───────── BACK PAGE ───────── -->
 <footer class="back">
@@ -349,6 +382,6 @@
 </footer>
 
 </div><!-- /sheet -->
-<script src="paper.js"></script>
+<script src="paper.js?v=3"></script>
 </body>
 </html>

@@ -16,7 +16,7 @@
   color-scheme: light;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 18px; -webkit-text-size-adjust: 100%; }
+html { scroll-behavior: smooth; scroll-padding-top: 84px; -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: #14110f; color: var(--ink); font-family: var(--serif); font-size: 17px; line-height: 1.55; overflow-x: hidden; }
 img { display: block; max-width: 100%; }
 a { color: inherit; }
@@ -99,14 +99,14 @@ h1, h2, h3, h4, p, ol, dl, dd, figure { margin: 0; padding: 0; }
 .contents li a:hover { background: var(--yellow); }
 .contents li b { font-family: var(--shout); font-weight: 400; text-transform: uppercase; font-size: 21px; line-height: 1.05; }
 .contents li i { grid-row: 2; font-size: 14px; color: var(--soft); }
-.contents li u { grid-row: 1 / 3; grid-column: 2; align-self: center; text-decoration: none; font-family: var(--pixel); font-size: 13px; color: var(--red); }
+.contents li a::after { content: '\25B6'; grid-row: 1 / 3; grid-column: 2; align-self: center; font-family: var(--pixel); font-size: 12px; color: var(--red); transition: translate .15s; }
+.contents li a:hover::after { translate: 5px 0; }
 .rack { display: flex; justify-content: space-around; align-items: flex-end; padding: 22px 8px 16px; background: #0a0c12; background-image: repeating-linear-gradient(0deg, #0000 0 2px, #ffffff0a 2px 4px); }
 
 /* ── banners ── */
 .banner { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 18px; background: var(--red); color: #fff; padding: 12px clamp(16px, 4vw, 48px); border-top: 4px solid var(--ink); border-bottom: 4px solid var(--ink); }
 .banner h2 { font-family: var(--shout); font-style: italic; font-weight: 400; text-transform: uppercase; font-size: clamp(34px, 5.4vw, 60px); line-height: 1; text-shadow: 4px 4px 0 var(--ink); }
 .banner p { font-family: var(--mono); font-size: clamp(16px, 2vw, 22px); text-transform: uppercase; letter-spacing: .08em; }
-.banner .pg, .folio span { font-family: var(--pixel); font-size: 13px; background: var(--yellow); color: var(--ink); padding: 9px 9px 7px; border: 3px solid var(--ink); }
 .banner.big { background: var(--ink); } .banner.big h2 { color: var(--yellow); text-shadow: 4px 4px 0 var(--red); }
 
 /* ── the scene ── */
@@ -144,7 +144,7 @@ h1, h2, h3, h4, p, ol, dl, dd, figure { margin: 0; padding: 0; }
 .spread { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: clamp(22px, 4vw, 52px); padding: clamp(30px, 5vw, 64px) clamp(16px, 4vw, 48px); border-bottom: 4px solid var(--ink); position: relative; }
 .spread.flip-side { grid-template-columns: minmax(0, 1fr) 300px; }
 .spread.flip-side .spread-cart { order: 2; }
-.spread-cart { position: sticky; top: 22px; align-self: start; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.spread-cart { position: sticky; top: 92px; align-self: start; display: flex; flex-direction: column; align-items: center; gap: 22px; }
 .spread-cart .cartstage { width: 100%; padding: 34px 0 30px; display: flex; justify-content: center; background: radial-gradient(closest-side, color-mix(in srgb, var(--c) 55%, transparent), transparent 72%); }
 .btn.play { background: var(--c); color: #0a0c12; box-shadow: 5px 5px 0 var(--ink); width: 100%; justify-content: center; text-align: center; }
 .btn.play:hover { box-shadow: 7px 7px 0 var(--ink); }
@@ -170,7 +170,6 @@ h1, h2, h3, h4, p, ol, dl, dd, figure { margin: 0; padding: 0; }
 .spread.dark .cols { column-rule-color: #ffffff33; }
 .spread.dark .btn.play { box-shadow: 5px 5px 0 #fff; color: #fff; }
 .spread.dark .panel { border-color: var(--c); box-shadow: 6px 6px 0 #fff2; }
-.spread.dark .folio span { border-color: #fff; }
 
 /* ── comic panels of real stills ── */
 .panels { display: grid; grid-template-columns: repeat(6, 1fr); gap: clamp(10px, 1.6vw, 18px); margin-top: 26px; position: relative; }
@@ -270,4 +269,75 @@ a:hover > .cart3d, .chan:hover .cart3d { animation-duration: 1.4s; }
   html { scroll-behavior: auto; }
   .ticker-run, .cart3d, .kb img, .kb2 img, .pop, .eq i, .logo .tile, .flip .still::before { animation: none !important; }
   .flip .still img { animation: none !important; opacity: 0; } .flip .still img:first-child { opacity: 1; }
+}
+
+
+/* ══════════ THE FUN PASS (2026-11-24): a bar that stays on top, a QR code, and everything moves ══════════ */
+/* ── the bar: logo left, sections in the middle, QR right, reading progress underneath ── */
+.topbar { position: sticky; top: 0; z-index: 45; display: flex; align-items: center; gap: 14px; height: 66px; padding: 0 clamp(10px, 2.4vw, 26px); background: #0a0c12; color: #eef2f8; border-bottom: 4px solid var(--red); }
+.tb-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; flex: none; }
+.tb-logo b { font-family: var(--pixel); font-weight: 400; font-size: 13px; color: var(--yellow); white-space: nowrap; text-shadow: 2px 2px 0 var(--red); }
+.logo.sm { --t: 13px; padding: 3px; box-shadow: none; gap: 2px; }
+.logo.sm .tile { animation: none; border-width: 1px; font-size: 7px; text-shadow: none; }
+.tb-logo:hover .logo.sm .tile.inv { animation: tileFlip .5s cubic-bezier(.45, .05, .3, 1); }
+.tb-links { flex: 1; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; justify-content: safe center; }
+.tb-links::-webkit-scrollbar { display: none; }
+.tb-links a { flex: none; font-family: var(--pixel); font-size: 9px; text-transform: uppercase; text-decoration: none; padding: 9px 9px 7px; border: 2px solid #eef2f833; color: #cfd6e4; transition: background .15s, color .15s, translate .15s; }
+.tb-links a:hover { border-color: var(--c); translate: 0 -2px; }
+.tb-links a.on { background: var(--c); border-color: var(--c); color: #0a0c12; }
+.qr { position: relative; flex: none; display: block; background: #fff; padding: 2px; border: 2px solid var(--yellow); line-height: 0; }
+.qr > img { width: 46px; height: 46px; image-rendering: pixelated; }
+.qr-big { position: absolute; right: -4px; top: calc(100% + 12px); display: grid; justify-items: center; gap: 8px; padding: 14px 14px 12px; background: #fff; border: 4px solid var(--ink); box-shadow: 8px 8px 0 var(--red); line-height: 1.2;
+  opacity: 0; scale: .2; transform-origin: 100% 0; pointer-events: none; transition: opacity .18s, scale .22s cubic-bezier(.2, 1.5, .4, 1); }
+.qr:hover .qr-big, .qr:focus-visible .qr-big { opacity: 1; scale: 1; }
+.qr-big img { width: 200px; height: 200px; max-width: none; image-rendering: pixelated; }
+.qr-big b { font-family: var(--pixel); font-weight: 400; font-size: 12px; color: var(--red); }
+.qr-big i { font-family: var(--mono); font-style: normal; font-size: 20px; color: var(--ink); text-transform: uppercase; }
+.tb-bar { position: absolute; left: 0; right: 0; bottom: -4px; height: 4px; background: var(--yellow); transform-origin: 0 50%; transform: scaleX(0); }
+.folio { color: var(--cd); }
+.spread.dark .folio { color: var(--c); }
+
+/* ── a nudge to scroll ── */
+.cue { margin-top: 26px; font-family: var(--pixel); font-size: 10px; text-transform: uppercase; color: var(--red); }
+.cue span { display: inline-block; animation: cue 1s steps(2) infinite; }
+@keyframes cue { 50% { translate: 0 7px; } }
+
+/* ── strips of type that run sideways as the page goes down ── */
+.zip { overflow: hidden; white-space: nowrap; background: var(--yellow); color: var(--ink); border-bottom: 4px solid var(--ink); font-family: var(--pixel); font-size: clamp(11px, 1.7vw, 16px); padding: 12px 0 10px; }
+.zip[data-dir="-1"] { background: var(--ink); color: var(--yellow); }
+.zip span { display: inline-block; will-change: transform; }
+.zip b { color: var(--red); font-weight: 400; margin: 0 14px; }
+
+/* ── bits that fly across the screen (paper.js makes them) ── */
+.bits { position: fixed; inset: 0; z-index: 30; pointer-events: none; overflow: hidden; }
+.bit { position: absolute; left: 0; top: 0; width: var(--s); height: var(--s); animation: fly var(--t) steps(90) infinite; animation-delay: var(--dl); will-change: transform; }
+.bit.rev { animation-direction: reverse; }
+.bit svg { display: block; width: 100%; height: 100%; animation: hop .8s steps(2) infinite; }
+@keyframes fly { from { transform: translateX(-60px); } to { transform: translateX(calc(100vw + 60px)); } }
+@keyframes hop { 50% { translate: 0 -5px; rotate: 8deg; } }
+
+/* ── things arrive as they are scrolled to ── */
+.js .rv { opacity: 0; transform: translateY(46px) scale(.94); transition: opacity .5s ease, transform .6s cubic-bezier(.2, 1.4, .4, 1); transition-delay: var(--rd, 0ms); }
+.js .title.rv { transform: translateX(-70px) skewX(-8deg); }
+.js .flip-side .title.rv { transform: translateX(70px) skewX(8deg); }
+.js .panel.rv { transform: translateY(60px) rotate(-4deg) scale(.9); }
+.js .panel.rv:nth-child(even) { transform: translateY(60px) rotate(4deg) scale(.9); }
+.js .chan.rv { transform: translateY(70px) rotate(3deg); }
+.js .rv.in { opacity: 1; transform: none; }
+.js .still img { scale: 1.1; will-change: translate; }
+.js .title { will-change: translate; }
+.sheet { overflow-x: clip; }   /* drifting titles and tilted panels never widen the page (clip keeps the sticky cartridge working) */
+.cart3d { cursor: grab; }
+
+@media (max-width: 860px) {
+  .tb-logo b { display: none; }
+  .topbar { height: 58px; gap: 10px; } .qr > img { width: 40px; height: 40px; }
+  .spread-cart { top: auto; }
+  html { scroll-padding-top: 70px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bits { display: none; }
+  .js .rv { opacity: 1; transform: none !important; transition: none; }
+  .cue span, .bit, .bit svg { animation: none !important; }
+  .js .still img { scale: 1; }
 }

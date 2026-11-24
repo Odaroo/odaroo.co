@@ -43,12 +43,93 @@
       } else {
         ry = el._base + Math.sin(y / 190 + el._i * 0.9) * 16;
       }
+      ry += mx * 16; rx -= my * 9;              /* the mouse leans every cartridge a little */
       el.style.transform = 'rotateX(' + rx.toFixed(1) + 'deg) rotateY(' + ry.toFixed(1) + 'deg)';
     }
+    extras(vh, y);
   }
+  var mx = 0, my = 0;
+  addEventListener('mousemove', function (e) { mx = e.clientX / innerWidth - 0.5; my = e.clientY / innerHeight - 0.5; if (!calm) ask(); }, { passive: true });
   function ask() { if (!queued) { queued = true; requestAnimationFrame(turn); } }
   if (calm) carts.forEach(function (el) { el.style.transform = 'rotateX(-8deg) rotateY(' + el._base + 'deg)'; });
-  else { addEventListener('scroll', ask, { passive: true }); addEventListener('resize', ask); turn(); }
+  else { addEventListener('scroll', ask, { passive: true }); addEventListener('resize', ask); }   /* the first turn() runs after section 2b has set up */
+
+  /* ── 2b. THE FUN PASS: everything else that moves with the scroll ──
+     the reading bar and the lit section on top, strips of type that run sideways, stills and titles that
+     drift (parallax), and the flying bits, each on its own depth. Only transform / translate is written. */
+  document.documentElement.classList.add('js');
+  var bar = document.querySelector('.tb-bar'), links = [].slice.call(document.querySelectorAll('.tb-links a'));
+  var secs = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+  var zips = [].slice.call(document.querySelectorAll('.zip span')), stills = [].slice.call(document.querySelectorAll('.still'));
+  var titles = [].slice.call(document.querySelectorAll('.spread .title')), bits = [], lit = -2;
+  function extras(vh, y) {
+    var max = document.documentElement.scrollHeight - vh;
+    if (bar) bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, y / max) : 0).toFixed(4) + ')';
+    var now = -1;
+    for (var i = 0; i < secs.length; i++) if (secs[i] && secs[i].getBoundingClientRect().top < vh * 0.45) now = i;
+    if (now !== lit) {
+      lit = now; links.forEach(function (a, k) { a.classList.toggle('on', k === now); });
+      if (now >= 0) { var row = links[now].parentNode; if (row.scrollWidth > row.clientWidth) row.scrollLeft = links[now].offsetLeft - row.offsetLeft - 30; }
+    }
+    zips.forEach(function (z) {
+      var r = z.parentNode.getBoundingClientRect(); if (r.bottom < -20 || r.top > vh + 20) return;
+      var dir = +z.parentNode.dataset.dir || 1, half = z.offsetWidth / 2 || 1, x = (y * 0.45) % half;
+      z.style.transform = 'translateX(' + (dir > 0 ? -x : x - half).toFixed(1) + 'px)';
+    });
+    stills.forEach(function (s) {
+      var r = s.getBoundingClientRect(); if (r.bottom < -50 || r.top > vh + 50) return;
+      var k = (r.top + r.height / 2 - vh / 2) / vh, imgs = s.children;
+      for (var j = 0; j < imgs.length; j++) imgs[j].style.translate = '0 ' + (-k * 7).toFixed(2) + '%';
+    });
+    titles.forEach(function (t) {
+      var r = t.getBoundingClientRect(); if (r.bottom < -50 || r.top > vh + 50) return;
+      t.style.translate = ((r.top - vh * 0.4) / vh * (t.closest('.flip-side') ? -46 : 46)).toFixed(1) + 'px 0';
+    });
+    for (var b = 0; b < bits.length; b++) {
+      var o = bits[b], span = vh + 80, yy = ((o.y * span - y * o.depth) % span + span) % span - 40;
+      o.el.style.translate = '0 ' + yy.toFixed(1) + 'px';
+    }
+  }
+  /* the bits: little pixel things, drawn here (7x7 maps), each flying across on its own lane and depth */
+  var MAPS = {
+    star:  ['...#...', '...#...', '#######', '.#####.', '..###..', '.##.##.', '#.....#'],
+    heart: ['.##.##.', '#######', '#######', '.#####.', '..###..', '...#...', '.......'],
+    coin:  ['..###..', '.#####.', '##.#.##', '##.#.##', '##.#.##', '.#####.', '..###..'],
+    moon:  ['..###..', '.###...', '###....', '###....', '###....', '.###...', '..###..'],
+    bolt:  ['...##..', '..##...', '.####..', '...##..', '..##...', '.##....', '.......'],
+    cart:  ['#####..', '#....#.', '#.##.##', '#.##..#', '#.##..#', '#.....#', '#######'],
+    play:  ['##.....', '####...', '######.', '#######', '######.', '####...', '##.....']
+  };
+  var INK = ['#d8281e', '#2447b5', '#e0a400', '#17120f', '#7b3fe4', '#ff2a6d', '#1c9c6b'];
+  if (!calm) {
+    var layer = document.createElement('div'); layer.className = 'bits'; layer.setAttribute('aria-hidden', 'true');
+    var names = Object.keys(MAPS), COUNT = innerWidth < 700 ? 9 : 16;
+    for (var n = 0; n < COUNT; n++) {
+      var map = MAPS[names[n % names.length]], col = INK[(n * 3) % INK.length], rects = '';
+      for (var py = 0; py < 7; py++) for (var px = 0; px < 7; px++) if (map[py].charAt(px) === '#') rects += '<rect x="' + px + '" y="' + py + '" width="1" height="1"/>';
+      var d = document.createElement('div'), far = n % 3;                 /* 0 near (big, fast) … 2 far (small, slow) */
+      d.className = 'bit' + (n % 2 ? ' rev' : '');
+      d.style.cssText = '--s:' + (26 - far * 7) + 'px;--t:' + (13 + far * 9 + (n % 4) * 2) + 's;--dl:-' + (n * 2.7).toFixed(1) + 's;opacity:' + (0.95 - far * 0.2);
+      d.innerHTML = '<svg viewBox="0 0 7 7" shape-rendering="crispEdges" fill="' + col + '" style="animation-delay:-' + (n * 0.13).toFixed(2) + 's">' + rects + '</svg>';
+      layer.appendChild(d);
+      bits.push({ el: d, y: ((n * 0.618) % 1), depth: 0.5 - far * 0.18 });
+    }
+    document.body.appendChild(layer);
+  }
+  /* things arrive as they are scrolled to (once), a beat apart inside the same group */
+  var arrive = [].slice.call(document.querySelectorAll('.front .shout, .front .deck, .front .cols, .contents, .chan, .jukebox, .banner h2, .wing span, .spread .folio, .spread .title, .spread .deck, .spread .cols, .specs, .panel'));
+  if (!calm && 'IntersectionObserver' in window) {
+    arrive.forEach(function (el) {
+      var sibs = el.parentNode ? [].slice.call(el.parentNode.children) : [];
+      el.style.setProperty('--rd', Math.min(4, Math.max(0, sibs.indexOf(el))) * 80 + 'ms');
+      el.classList.add('rv');
+    });
+    var seen = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); seen.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    arrive.forEach(function (el) { seen.observe(el); });
+  }
+  if (!calm) turn();
 
   /* ── 3. stills move only while they are looked at ── */
   var panels = [].slice.call(document.querySelectorAll('.panel'));
