@@ -1,0 +1,2 @@
+Syncopate (Astigmatic) and VT323 (Peter Hull) are licensed under the SIL Open Font License 1.1:
+https://openfontlicense.org — latin subsets, kept here so the arcade opens with no signal.
