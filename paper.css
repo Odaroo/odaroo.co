@@ -30,6 +30,13 @@ h1, h2, h3, h4, p, ol, dl, dd, figure { margin: 0; padding: 0; }
 .ticker-run span::after { content: '★'; color: var(--red); margin-left: 44px; }
 @keyframes tick { to { transform: translateX(-50%); } }
 
+/* ── the speaker: the one thing in a corner, as on the arcade ── */
+#snd { all: unset; position: fixed; z-index: 50; right: max(14px, calc(env(safe-area-inset-right) + 10px)); bottom: max(14px, calc(env(safe-area-inset-bottom) + 10px));
+  width: 46px; height: 46px; display: grid; place-items: center; cursor: pointer; background: var(--ink); color: var(--yellow); border: 3px solid var(--yellow); box-shadow: 4px 4px 0 var(--red); }
+#snd:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+#snd svg { width: 24px; height: 24px; }
+#snd .x { display: none; } #snd.off .x { display: inline; } #snd.off .w { display: none; }
+
 /* ── the sheet of newsprint ── */
 .sheet { max-width: 1240px; margin: 0 auto; background-color: var(--paper);
   background-image: radial-gradient(#0000000b 1px, transparent 1.4px), linear-gradient(90deg, #00000010, transparent 3%, transparent 97%, #00000010);

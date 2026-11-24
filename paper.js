@@ -2,7 +2,7 @@
    1. builds every 3D cartridge from its data attributes (one box, six faces);
    2. turns the cartridges with the scroll: a spread's cartridge makes a full turn while its story is read;
    3. runs the stills only while they are on screen;
-   4. the jukebox: one <audio>, two buttons. */
+   4. the music: the arcade's song starts by itself; a speaker and the jukebox control it. */
 (function () {
   'use strict';
   var calm = false;
@@ -59,17 +59,51 @@
     panels.forEach(function (p) { io.observe(p); });
   } else panels.forEach(function (p) { p.classList.add('live'); });
 
-  /* ── 4. the jukebox ── */
-  var deck = document.getElementById('deck'), tracks = [].slice.call(document.querySelectorAll('.track')), on = null;
-  function show() { tracks.forEach(function (t) { t.setAttribute('aria-pressed', t === on && !deck.paused ? 'true' : 'false'); }); }
-  tracks.forEach(function (t) {
-    t.addEventListener('click', function () {
-      if (on === t && !deck.paused) { deck.pause(); show(); return; }
-      if (on !== t) { deck.src = t.dataset.src; on = t; }
-      deck.volume = 0.7;
-      var p = deck.play(); if (p && p.catch) p.catch(function () {});
+  /* ── 4. the music: the arcade's own song starts by itself, exactly as it does at play.odaroo.co
+     (Odaroo, 2026-11-24: "the same song… start automatically in odaroo.co as well"). A browser will not
+     play sound before the visitor's first touch, so it is asked for as the page opens (allowed where the
+     site has been visited before) and again on the first tap or key. It loops, fades in, rests while the
+     tab is hidden, and OFF is remembered (the speaker in the corner, or pausing it on the jukebox). ── */
+  var deck = document.getElementById('deck'), tracks = [].slice.call(document.querySelectorAll('.track'));
+  var snd = document.getElementById('snd'), MUTE = 'odaroo.paper.mute', VOL = 0.5, muted = false, on = tracks[0] || null, fade = 0;
+  try { muted = localStorage.getItem(MUTE) === '1'; } catch (e) {}
+  function remember() { try { localStorage.setItem(MUTE, muted ? '1' : '0'); } catch (e) {} }
+  function show() {
+    tracks.forEach(function (t) { t.setAttribute('aria-pressed', t === on && !deck.paused ? 'true' : 'false'); });
+    if (snd) { snd.classList.toggle('off', muted || deck.paused); snd.setAttribute('aria-label', muted || deck.paused ? 'Music on' : 'Music off'); }
+  }
+  function fadeTo(v, then) {
+    clearInterval(fade);
+    fade = setInterval(function () {
+      var d = v - deck.volume, st = 0.04;
+      if (Math.abs(d) <= st) { deck.volume = v; clearInterval(fade); if (then) then(); }
+      else deck.volume = Math.max(0, Math.min(1, deck.volume + (d > 0 ? st : -st)));
+    }, 60);
+  }
+  function musicOn() {
+    if (!deck || !on || muted || document.hidden || !deck.paused) return;
+    if (deck.getAttribute('src') !== on.dataset.src) deck.src = on.dataset.src;
+    deck.volume = 0;
+    var p = deck.play();
+    if (p && p.then) p.then(function () { fadeTo(VOL); }).catch(function () {});
+  }
+  function musicOff() { fadeTo(0, function () { deck.pause(); }); }
+  if (deck) {
+    deck.loop = true;
+    ['play', 'pause', 'ended'].forEach(function (ev) { deck.addEventListener(ev, show); });
+    tracks.forEach(function (t) {
+      t.addEventListener('click', function () {
+        if (on === t && !deck.paused) { muted = true; remember(); musicOff(); return; }
+        if (on !== t) { deck.pause(); on = t; }
+        muted = false; remember(); musicOn();
+      });
     });
-  });
-  if (deck) ['play', 'pause', 'ended'].forEach(function (ev) { deck.addEventListener(ev, show); });
-  document.addEventListener('visibilitychange', function () { if (document.hidden && deck && !deck.paused) deck.pause(); });
+    if (snd) snd.addEventListener('click', function () { muted = !(muted || deck.paused); remember(); if (muted) musicOff(); else musicOn(); show(); });
+    show(); musicOn();                                             /* with the page, from the top */
+    ['pointerdown', 'keydown', 'touchend'].forEach(function (ev) {
+      addEventListener(ev, function (e) { if (e.target && e.target.closest && e.target.closest('#snd, .track')) return; musicOn(); }, { passive: true, capture: true });
+    });
+    document.addEventListener('visibilitychange', function () { if (document.hidden) { if (!deck.paused) deck.pause(); } else musicOn(); });
+    addEventListener('pagehide', function () { deck.pause(); });
+  }
 })();
