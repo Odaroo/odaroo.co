@@ -83,14 +83,15 @@
     --wide: 'Syncopate', 'Helvetica Neue', Arial, sans-serif; --mono: 'VT323', 'Courier New', monospace;
     --gap: clamp(6px, 1.6vw, 16px);
     /* an upright screen: five outlets across, the games three across (two rows of three) */
-    --oc: min(calc((100vw - 44px - 4 * var(--gap)) / 5), 11.5dvh, 124px);
-    --gz: min(calc((100vw - 44px - 2 * var(--gap)) / 3), 11.5dvh, 124px);
+    --oc: min(calc((100vw - 44px - 4 * var(--gap)) / 5), 9.6dvh, 116px);
+    --gz: min(calc((100vw - 44px - 2 * var(--gap)) / 3), 9.6dvh, 116px);
+    --deck: clamp(46px, 12.5dvh, 112px);
     --gcols: 3;
     color-scheme: dark;
   }
   /* a sideways or desktop screen: the games stand in ONE row, in order */
   @media (min-aspect-ratio: 1/1) {
-    :root { --oc: min(calc((100vw - 44px - 5 * var(--gap)) / 6), 15dvh, 132px); --gz: var(--oc); --gcols: 6; }
+    :root { --oc: min(calc((100vw - 44px - 5 * var(--gap)) / 6), 13dvh, 124px); --gz: var(--oc); --gcols: 6; }
   }
   html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; background: #000; color: var(--ink); }
   body { height: 100dvh; display: flex; flex-direction: column; -webkit-tap-highlight-color: transparent; font-family: var(--wide);
@@ -98,11 +99,18 @@
 
   /* the wall: the name, then the two shelves. It leans a few pixels with the phone's tilt (or the mouse). */
   #orbit { position: relative; z-index: 2; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; align-items: center;
-           justify-content: center; gap: clamp(8px, 2.4dvh, 26px); will-change: transform;
+           justify-content: center; gap: clamp(6px, 1.8dvh, 22px); will-change: transform;
            padding: max(14px, calc(env(safe-area-inset-top) + 8px)) 22px 0; }
-  #mast { text-align: center; line-height: 1; }
-  #mast b { display: block; font-weight: 700; font-size: clamp(16px, 3.6vmin, 26px); letter-spacing: .5em; margin-right: -.5em; }
-  #mast i { display: block; margin-top: .45em; font-style: normal; font-family: var(--mono); font-size: clamp(15px, 2.8vmin, 20px);
+  /* ⭐ 2026-11-26 (later) — THE MARK, NOT THE WORD (Odaroo: "completely remove the Odaroo. Just put Odaroo & Co., the
+     logo, on top"). The nine tiles O D A / R O O / & C O. as the boot leaves them (the O diagonal lit), small and still. */
+  #mast { text-align: center; line-height: 1; margin-bottom: clamp(4px, 1.6dvh, 18px); }
+  #mark { --mt: clamp(13px, 2.7dvh, 21px); display: inline-grid; grid-template-columns: repeat(3, var(--mt)); grid-auto-rows: var(--mt);
+          gap: calc(var(--mt) * .14); font-family: 'ODPixel', 'Courier New', monospace; }
+  #mark b { position: relative; box-sizing: border-box; display: flex; align-items: center; justify-content: center; background: #0d1018;
+            border: max(1px, calc(var(--mt) * .08)) solid #eef2f8; color: #eef2f8; font-weight: 400; font-size: calc(var(--mt) * .48); line-height: 1; }
+  #mark b.o { background: #eef2f8; color: #0d1018; }
+  #mark b u { position: absolute; left: 62%; bottom: 14%; text-decoration: none; font-size: .7em; }
+  #mast i { display: block; margin-top: .7em; font-style: normal; font-family: var(--mono); font-size: clamp(15px, 2.8vmin, 20px);
             letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
   .shelf { display: flex; flex-direction: column; align-items: center; gap: clamp(5px, 1.2dvh, 12px); }
   .shelf h2 { margin: 0; display: flex; align-items: center; gap: 12px; font: 400 clamp(15px, 2.7vmin, 19px)/1 var(--mono);
@@ -130,37 +138,94 @@
      order: the outlets left to right, then the games oldest first. body.ringwait hides everything under the boot;
      body.ringin drops each cartridge in on its own beat (--k), then the card arrives. The img is what animates
      (scale/opacity) — .cart's own scale is the lit one's and .bob's translate/rotate the float. */
-  body.ringwait .cart img, body.ringwait #info, body.ringwait #mast, body.ringwait .shelf h2 { opacity: 0; }
+  body.ringwait .cart img, body.ringwait #info, body.ringwait #mast, body.ringwait .shelf h2, body.ringwait #deck { opacity: 0; }
   body.ringin .cart img { animation: cartIn .46s cubic-bezier(.2, 1.5, .4, 1) both; animation-delay: calc(var(--k, 0) * 170ms); }
   body.ringin #mast, body.ringin .shelf h2 { animation: infoIn .5s ease both; }
-  body.ringin #info { animation: infoIn .5s ease both; animation-delay: calc(var(--kn, 6) * 170ms + 250ms); }
+  body.ringin #info, body.ringin #deck { animation: infoIn .5s ease both; animation-delay: calc(var(--kn, 6) * 170ms + 250ms); }
   @keyframes cartIn { 0% { opacity: 0; scale: .2; } 60% { opacity: 1; scale: 1.12; } 100% { opacity: 1; scale: 1; } }
   @keyframes infoIn { from { opacity: 0; translate: 0 12px; } to { opacity: 1; translate: 0 0; } }
 
-  /* the lit cartridge's card: what it is (one word), its name, one line, and the button */
-  #info { position: relative; z-index: 3; flex: 0 0 auto; text-align: center;
-          padding: clamp(8px, 2dvh, 22px) 20px max(24px, calc(env(safe-area-inset-bottom) + 16px)); }
+  /* the lit cartridge's card: what it is (one word), its name, and TWO LINES — always two, each on its own row
+     (Odaroo, 2026-11-26: "Visuals and captures." then a break, then "Worlds in motion."). ⚠ There is NO BUTTON
+     any more: a cartridge is opened by carrying it down into the handheld below (see #deck). */
+  #info { position: relative; z-index: 3; flex: 0 0 auto; text-align: center; padding: clamp(4px, 1.4dvh, 16px) 16px clamp(4px, 1.2dvh, 14px); }
   .more { animation: moreIn .3s ease both; }
   @keyframes moreIn { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
   .kind { margin: 0 0 .45em; font-family: var(--mono); font-size: clamp(15px, 2.7vmin, 19px); line-height: 1; letter-spacing: .3em;
           margin-right: -.3em; color: var(--c); text-transform: uppercase; }
-  h1 { margin: 0 0 .3em; font-weight: 700; line-height: 1; letter-spacing: .08em; font-size: clamp(20px, min(6.6vw, 5dvh), 52px);
+  h1 { margin: 0 0 .3em; font-weight: 700; line-height: 1; letter-spacing: .08em; font-size: clamp(19px, min(6.2vw, 4.4dvh), 46px);
        text-shadow: 0 4px 30px rgba(0,0,0,.8); overflow-wrap: anywhere; }
-  .tag { font-family: var(--mono); font-size: clamp(18px, 3.4vmin, 24px); line-height: 1.1; color: #e2dbea; max-width: 36ch;
-         margin: 0 auto clamp(10px, 2dvh, 22px); min-height: 2.2em; text-shadow: 0 2px 12px #000; }
+  .tag { font-family: var(--mono); font-size: clamp(17px, min(4.5vw, 3.2vmin + 6px), 24px); line-height: 1.1; color: #e2dbea; margin: 0; text-shadow: 0 2px 12px #000; }
+  .tag span { display: block; white-space: nowrap; }
   .tag .rt { display: inline-block; margin-left: 8px; padding: 0 5px; border: 1px solid var(--c); color: var(--c); font-size: .85em; line-height: 1.2; }
-  .go { all: unset; display: inline-flex; align-items: center; gap: 14px; cursor: pointer; color: #000; background: var(--c);
-        padding: clamp(11px, 2dvh, 15px) clamp(26px, 6vw, 40px); font-weight: 700; font-size: clamp(11px, 2.6vmin, 14px); letter-spacing: .4em;
-        transition: background .4s, transform .15s; box-shadow: 0 0 28px color-mix(in srgb, var(--c) 45%, transparent); }
-  .go:active { transform: scale(.97); }
-  .go:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
-  .go svg { width: 12px; height: 12px; }
-  /* a short screen (a phone on its side): the words step back so both shelves and the button still fit */
+
+  /* ⭐⭐⭐ 2026-11-26 (later) — THE HANDHELD: THE BACK OF A GAME BOY, AND THE CARTRIDGE GOES IN IT (Odaroo: "remove the
+     button… the back of a Game Boy in the same silhouette design, the neon white contour… press and hold the cartridge
+     to swipe it down. Only when it swipes down does the screen start glitching… as if everything's connecting… then
+     redirect… Don't have anything that says drag and drop. Make it intuitive"). Only its top edge and cartridge bay
+     show, rising from the foot of the screen. NO WORDS, no arrow: the bay breathes, and brightens while a cartridge
+     is being carried. Drawn with square corners on purpose (the cartridges are pixel shells). */
+  #deck { position: relative; z-index: 3; flex: 0 0 auto; height: var(--deck); display: flex; justify-content: center; overflow: hidden;
+          padding-bottom: env(safe-area-inset-bottom); }
+  #deck svg { display: block; height: 100%; width: auto; aspect-ratio: 220 / 96; overflow: visible; fill: none; stroke: #f4f8ff; stroke-width: 3;
+              stroke-linejoin: miter; shape-rendering: crispEdges; filter: drop-shadow(0 0 5px #bfe6ffaa); opacity: .8; transition: opacity .25s; }
+  #deck .bay { stroke: var(--c); animation: bay 2.6s ease-in-out infinite; }
+  @keyframes bay { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+  body.carry #deck svg { opacity: 1; }
+  body.carry #deck .bay { animation-duration: .7s; }
+  /* the cartridge in the hand: a copy that follows the finger (the one on the shelf dims until it is let go) */
+  #held { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none; will-change: transform; }
+  #held img { display: block; width: 100%; height: 100%; image-rendering: pixelated; filter: drop-shadow(0 0 12px var(--gc, #fff)); }
+  #held.back, #held.seat { transition: transform .26s cubic-bezier(.3, .9, .3, 1), opacity .26s; }
+  #held.sunk { transition: transform .34s cubic-bezier(.5, 0, .9, .4); }
+  .cart.away { opacity: .14 !important; }
+  .cart { touch-action: none; }
+
+  /* THE LOOP BEHIND: a short, silent film of whatever is lit (its page scrolling, or the game being played), dim
+     enough that the shelves stay the subject. One <video>, fetched only once a cartridge has stayed lit for a moment;
+     not at all with Save-Data or reduced motion. (2026-10-28 took the old 23 MB of loops off for speed: these are
+     small squares, a few hundred KB each, and only the lit one is ever asked for.) */
+  #bg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0; transition: opacity .7s ease; pointer-events: none; }
+  #bg.on { opacity: .3; }
+  #shade { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, #0000 0%, #000a 78%, #000 100%); opacity: 0; transition: opacity .7s; }
+  #bg.on + #shade { opacity: 1; }
+
+  /* the controller picture (padlink.js draws it at the foot of the screen) would sit on the handheld: here it goes top-left */
+  #padlinkHud { left: max(8px, env(safe-area-inset-left)) !important; top: max(8px, env(safe-area-inset-top)) !important; bottom: auto !important;
+                translate: 0 0 !important; width: min(120px, 28vw) !important; }
+
+  /* CONNECTING: the picture tears for a couple of seconds, collapses to a line, and the link opens. No words. */
+  #glitch { position: fixed; inset: 0; z-index: 40; pointer-events: none; display: none; overflow: hidden; }
+  body.glitch #glitch { display: block; }
+  #glitch::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, #0000 0 2px, #ffffff14 2px 4px); }
+  #glitch i { position: absolute; left: 0; right: 0; height: 9%; background: linear-gradient(#fff0, color-mix(in srgb, var(--c) 38%, #fff0), #fff0); animation: gbar 0.9s linear infinite; }
+  #glitch i + i { height: 4%; animation-duration: .55s; animation-direction: reverse; background: linear-gradient(#fff0, #ffffff40, #fff0); }
+  @keyframes gbar { from { translate: 0 -20vh; } to { translate: 0 120vh; } }
+  #glitch b { position: absolute; inset: 0; background: #fff; opacity: 0; animation: gflash 2.4s steps(1) both; }
+  @keyframes gflash { 0%, 6% { opacity: .5; } 7%, 30% { opacity: 0; } 31% { opacity: .18; } 33%, 61% { opacity: 0; } 62% { opacity: .25; } 64%, 100% { opacity: 0; } }
+  body.glitch #orbit, body.glitch #info, body.glitch #deck { animation: gtear .34s steps(1) infinite; }
+  body.glitch #info { animation-duration: .27s; animation-delay: -.11s; }
+  body.glitch #deck { animation-duration: .41s; animation-delay: -.2s; }
+  @keyframes gtear {
+    0% { translate: 0 0; clip-path: none; opacity: 1; }
+    14% { translate: -9px 0; clip-path: inset(8% 0 58% 0); }
+    28% { translate: 7px 2px; clip-path: inset(46% 0 22% 0); opacity: .8; }
+    42% { translate: 0 0; clip-path: none; opacity: 1; }
+    57% { translate: 12px -1px; clip-path: inset(70% 0 4% 0); }
+    71% { translate: -4px 0; clip-path: inset(0 0 81% 0); opacity: .7; }
+    85% { translate: 2px 0; clip-path: none; opacity: 1; }
+  }
+  body.gone #orbit, body.gone #info, body.gone #deck, body.gone #bg, body.gone #held { animation: gout .42s cubic-bezier(.7, 0, 1, .5) forwards; }
+  @keyframes gout { 0% { scale: 1 1; opacity: 1; } 70% { scale: 1.04 .012; opacity: 1; } 100% { scale: 0 .004; opacity: 0; } }
+  /* a short screen (a phone on its side): the words step back so both shelves and the handheld still fit */
   @media (max-height: 540px) {
     #mast i, .kind { display: none; }
-    #orbit { gap: 6px; } .shelf { gap: 3px; }
-    .tag { min-height: 1.1em; margin-bottom: 8px; max-width: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #info { padding-top: 4px; padding-bottom: max(10px, calc(env(safe-area-inset-bottom) + 6px)); }
+    #mark { --mt: 9px; } #mast { margin-bottom: 0; }
+    #orbit { gap: 4px; } .shelf { gap: 2px; }
+    :root { --deck: 40px; }
+    h1 { margin-bottom: .15em; }
+    .tag span { display: inline; } .tag span + span::before { content: ' '; }
+    #info { padding-top: 2px; padding-bottom: 2px; }
   }
 
   /* THE MUSIC (Odaroo, 2026-10-09: "add my own track to play in the background"). The one thing in a
@@ -210,7 +275,7 @@
   16%, 100% { opacity: 1; background-color: #eef2f8; box-shadow: inset 0 0 0 calc(var(--odct) * .045) #eef2f8; } }
 #introLogo.show .odc-tile.inv span { color: #0d1018; text-shadow: none; }
   @media (prefers-reduced-motion: reduce) {
-    .bg, .bob, .more { animation: none !important; }
+    .bg, .bob, .more, #deck .bay { animation: none !important; }
   }
 </style>
 </head>
@@ -290,6 +355,7 @@
   function sndConnect() { chime('connect'); }
   function sndCoin() { chime('coin'); }
   IN.sounds = { mystery: 0, coin: 0, connect: 0, tick: 0 };
+  IN.chime = function (k) { try { chime(k); } catch (e) {} };   /* the page rings the same coin / connect chimes when a cartridge goes in */
   IN.tick = function (k) { IN.sounds.tick++; tone(659.25 * Math.pow(2, k / 12), 0, 0.07, 'square', 0.07); tone(1318.5 * Math.pow(2, k / 12), 0.03, 0.12, 'sine', 0.03); };   /* counted, so a harness can hear the chime */
   /* ⭐ 2026-10-17 — NO CARTRIDGE, NO TAP TO LOAD (Odaroo: "remove the cartridge animation insert or tap to
      load, and just have the Odaroo… two cartridges are confusing" — the cartridges come later, on the ring).
@@ -341,12 +407,22 @@
   }, true);
 })();
 </script>
+<video id="bg" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video><div id="shade"></div>
 <main id="orbit">
-  <div id="mast"><b>ODAROO</b><i>Artist &middot; video, live, music, games</i></div>
+  <div id="mast"><div id="mark" role="img" aria-label="Odaroo &amp; Co."><b class="o">O</b><b>D</b><b>A</b><b>R</b><b class="o">O</b><b>O</b><b>&amp;</b><b>C</b><b class="o">O<u>.</u></b></div><i>Artist &middot; video, live, music, games</i></div>
   <section class="shelf" aria-label="Where to find Odaroo"><h2>The outlets</h2><div class="row" id="rowOut"></div></section>
   <section class="shelf" aria-label="The games, oldest first"><h2>The games</h2><div class="row" id="rowGames"></div></section>
 </main>
 <div id="info"></div>
+<!-- the back of the handheld, top edge only: body, the cartridge bay (.bay), grip ridges, two screws. No words. -->
+<div id="deck" aria-hidden="true"><svg viewBox="0 0 220 96">
+  <path d="M6 96V20h6v-6h6V8h52V2h80v6h52v6h6v6h6v76"/>
+  <path class="bay" d="M62 96V26h96v70"/>
+  <path d="M74 38h72M74 48h72" stroke-width="2" opacity=".55"/>
+  <path d="M20 34h28M20 44h28M20 54h28M172 34h28M172 44h28M172 54h28" stroke-width="2" opacity=".55"/>
+  <path d="M26 74h8v8h-8zM186 74h8v8h-8z" stroke-width="2" opacity=".7"/>
+</svg></div>
+<div id="glitch" aria-hidden="true"><i></i><i></i><b></b></div>
 <audio id="bgm" src="audio/catchphrases-and-misunderstandings.mp3" loop preload="auto"></audio>
 <button id="snd" type="button" aria-label="Music off" title="Music: Odaroo — Catchphrases and Misunderstandings">
   <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -382,17 +458,32 @@
      their own names again (the one-word VIDEO / AUDIO / COMMUNITY is now the small line above the name, `kind`).
      They open in this same tab; the button says what you do there. The Twitch address is set in ONE place, here. */
   var OUTLETS = [
-    { slug: 'youtube', href: 'https://www.youtube.com/@whoisodaroo', kind: 'Video', title: 'YOUTUBE', btn: 'WATCH', color: '#ff3d3d',
-      tagline: 'Visuals and captures. Worlds in motion.' },
-    { slug: 'twitch', href: 'https://www.twitch.tv/odaroo', kind: 'Live', title: 'TWITCH', btn: 'TUNE IN', color: '#a970ff',
-      tagline: 'Odaroo, live and unscripted.' },
-    { slug: 'bandcamp', href: 'https://odaroo.bandcamp.com/', kind: 'Audio', title: 'BANDCAMP', btn: 'LISTEN', color: '#3ec1d8',
-      tagline: 'Soundtracks and concept albums.' },
-    { slug: 'soundcloud', href: 'https://soundcloud.com/odaroo', kind: 'Audio', title: 'SOUNDCLOUD', btn: 'LISTEN', color: '#ff7a1a',
-      tagline: 'More music by Odaroo, streaming on SoundCloud.' },
-    { slug: 'discord', href: 'https://discord.gg/ENY6PbKT7f', kind: 'Community', title: 'DISCORD', btn: 'JOIN', color: '#7b86ff',
-      tagline: 'The Odaroo & Co. community. News, playtests, leaderboards and more.' }
+    { slug: 'youtube', href: 'https://www.youtube.com/@whoisodaroo', kind: 'Video', title: 'YOUTUBE', color: '#ff3d3d', lines: ['Visuals and captures.', 'Worlds in motion.'] },
+    { slug: 'twitch', href: 'https://www.twitch.tv/odaroo', kind: 'Live', title: 'TWITCH', color: '#a970ff', lines: ['Odaroo, live.', 'Unscripted.'] },
+    { slug: 'bandcamp', href: 'https://odaroo.bandcamp.com/', kind: 'Audio', title: 'BANDCAMP', color: '#3ec1d8', lines: ['Soundtracks.', 'Concept albums.'] },
+    { slug: 'soundcloud', href: 'https://soundcloud.com/odaroo', kind: 'Audio', title: 'SOUNDCLOUD', color: '#ff7a1a', lines: ['More music by Odaroo.', 'Streaming on SoundCloud.'] },
+    { slug: 'discord', href: 'https://discord.gg/ENY6PbKT7f', kind: 'Community', title: 'DISCORD', color: '#7b86ff', lines: ['The Odaroo & Co. community.', 'News, playtests, leaderboards.'] }
   ];
+  /* ⭐⭐ THE WORDS UNDER A CARTRIDGE ARE ALWAYS TWO LINES (Odaroo, 2026-11-26: "I want a break line… always separate two
+     lines visually"). The games' two lines are written here, short enough for a folded phone; a game this table does
+     not know has its own tagline cut in two by twoLines() (at its first full stop, else near the middle). */
+  var LINES = {
+    inkville:      ['A rubberhose rumble.', 'Collect, play, battle online.'],
+    lunatide:      ['A dream-wind platformer', 'under a tidal moon.'],
+    chromeanimals: ['A neon-noir massacre.', 'One hit kills. Pick a mask.'],
+    vrlabs:        ['Put on a headset.', 'A lab of games for your hands.'],
+    lusolaos:      ['A river of painted tiles.', 'Turn, swap, breathe.'],
+    edgework:      ['Hold the blades. Press the seal.', 'Never touch an edge.']
+  };
+  function twoLines(t) {
+    t = String(t || '').trim(); if (!t) return ['', ''];
+    var m = /^(.{6,}?[.!?:])\s+(.+)$/.exec(t); if (m) return [m[1], m[2]];
+    var mid = t.length >> 1, a = t.lastIndexOf(' ', mid), b = t.indexOf(' ', mid), k = a < 0 ? b : b < 0 ? a : (mid - a <= b - mid ? a : b);
+    return k < 0 ? [t, ''] : [t.slice(0, k), t.slice(k + 1)];
+  }
+  /* THE LOOPS BEHIND (art/loop-<slug>.mp4): only the cartridges listed here have one. A square, silent, 5-10 second
+     film that loops without a seam (tools/arcade-rec/loops.mjs makes the games'). */
+  var LOOPS = ['inkville', 'lunatide', 'chromeanimals', 'vrlabs', 'lusolaos', 'edgework'];
   /* THE BOTTOM SHELF: the games in the order they were made, Inkville first and Edgework last. games.json (the
      server) already lists them that way; this is the same list for a page opened with no server behind it. */
   var FALLBACK = [
@@ -445,18 +536,29 @@
     built = true; ringIn();
   }
 
-  /* light cartridge i: its colour, and its card under the shelves */
+  /* light cartridge i: its colour, its card under the shelves (two lines, no button), and its loop behind */
   function select(i) {
-    if (!N) return;
+    if (!N || loading) return;
     i = ((i % N) + N) % N; if (i === front) return;
     if (carts[front]) carts[front].classList.remove('sel');
     front = i; carts[i].classList.add('sel');
-    var g = G[i], kind = g.kind || ('Game ' + (i - NO + 1) + ' of ' + (N - NO));
+    var g = G[i], kind = g.kind || ('Game ' + (i - NO + 1) + ' of ' + (N - NO)), ln = g.lines || LINES[g.slug] || twoLines(g.tagline);
     document.documentElement.style.setProperty('--c', g.color);
     $('info').innerHTML = '<div class="more" id="more"><p class="kind">' + esc(kind) + '</p><h1>' + esc(g.title) + '</h1>' +
-      '<p class="tag">' + esc(g.tagline || '') + (g.rating ? '<span class="rt">' + esc(g.rating) + '</span>' : '') + '</p></div>' +
-      '<button class="go" id="go" type="button">' + esc(g.btn || 'PLAY') + '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 0 L10 5 L1 10 Z" fill="currentColor"/></svg></button>';
-    $('go').addEventListener('click', function () { play(front); });
+      '<p class="tag"><span>' + esc(ln[0]) + '</span><span>' + esc(ln[1] || '') + (g.rating ? '<span class="rt">' + esc(g.rating) + '</span>' : '') + '</span></p></div>';
+    loopFor(g.slug);
+  }
+  /* the loop behind: asked for only once a cartridge has stayed lit a moment, so walking the shelf fetches nothing */
+  var bg = $('bg'), loopT = 0, LEAN = false;
+  try { LEAN = (navigator.connection && navigator.connection.saveData) || matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  function loopFor(slug) {
+    clearTimeout(loopT); bg.classList.remove('on');
+    if (LEAN || LOOPS.indexOf(slug) < 0) { loopT = setTimeout(function () { try { bg.pause(); bg.removeAttribute('src'); bg.load(); } catch (e) {} }, 700); return; }
+    loopT = setTimeout(function () {
+      var src = 'art/loop-' + slug + '.mp4';
+      if (bg.getAttribute('src') !== src) bg.setAttribute('src', src);
+      var p = bg.play(); if (p && p.then) p.then(function () { if (G[front] && G[front].slug === slug) bg.classList.add('on'); }, function () {});
+    }, 520);
   }
   /* up / down: the cartridge on the next shelf (or row) that stands closest to this one */
   function vert(dir) {
@@ -489,6 +591,43 @@
     odaKeep().then(leave, leave); setTimeout(leave, 700);
   }
 
+  /* ── THE CARTRIDGE GOES IN THE HANDHELD (2026-11-26). `held` is a copy of the cartridge that follows the finger;
+     let go over the handheld (or thrown well down toward it) and load() seats it in the bay, the picture tears for
+     GLITCH_MS as if connecting, collapses, and play() opens the link. Let go anywhere else and it flies home.
+     Enter / A on a controller does the same thing by itself, so the page still works with no touch. ── */
+  var held = null, heldI = -1, loading = false, GLITCH_MS = 2400;
+  function chime(k) { try { if (window.odaIntro && window.odaIntro.chime) window.odaIntro.chime(k); } catch (e) {} }
+  function rectOf(el) { var r = el.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; }
+  function pick(i) {                             /* lift cartridge i off the shelf */
+    var c = carts[i], r = rectOf(c.querySelector('img'));
+    held = document.createElement('div'); held.id = 'held'; heldI = i;
+    held.style.width = r.w + 'px'; held.style.height = r.h + 'px'; held.style.setProperty('--gc', G[i].color);
+    held.innerHTML = '<img alt="" draggable="false" src="' + esc(c.querySelector('img').getAttribute('src')) + '">';
+    held._home = r; moveHeld(r.x, r.y, 1);
+    document.body.appendChild(held); c.classList.add('away'); document.body.classList.add('carry');
+    return held;
+  }
+  function moveHeld(x, y, sc) { held._x = x; held._y = y; held.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) scale(' + (sc || 1) + ')'; }
+  function drop() {                              /* not in the handheld: back to its place on the shelf */
+    var h = held, i = heldI; if (!h) return; held = null; heldI = -1;
+    document.body.classList.remove('carry');
+    h.classList.add('back'); h.style.transform = 'translate3d(' + h._home.x.toFixed(1) + 'px,' + h._home.y.toFixed(1) + 'px,0) scale(1)';
+    setTimeout(function () { if (carts[i]) carts[i].classList.remove('away'); if (h.parentNode) h.parentNode.removeChild(h); }, 270);
+  }
+  function load(i) {                             /* into the bay, then the connection, then the link */
+    if (loading || !G[i]) return; loading = true;
+    if (!held || heldI !== i) { if (held) drop(); pick(i); held.getBoundingClientRect(); }
+    var h = held, d = rectOf($('deck')), bay = Math.min(d.w * 0.4, d.h * 0.95), sc = Math.max(0.3, Math.min(1.2, bay / h._home.w));
+    var x = d.x + d.w / 2 - h._home.w / 2, y = d.y + d.h * 0.2 - h._home.h * (1 - sc) / 2;
+    document.body.classList.remove('carry');
+    h.classList.add('seat'); h.style.transformOrigin = '50% 0'; moveHeld(x, d.y - h._home.h * sc * 0.55, sc);
+    setTimeout(function () { h.classList.remove('seat'); h.classList.add('sunk'); moveHeld(x, y, sc); }, 270);
+    setTimeout(function () { chime('coin'); document.body.classList.add('glitch'); }, 560);
+    setTimeout(function () { chime('connect'); }, 560 + GLITCH_MS - 620);
+    setTimeout(function () { document.body.classList.add('gone'); }, 560 + GLITCH_MS - 420);
+    setTimeout(function () { play(i); }, 560 + GLITCH_MS);
+  }
+
   /* ── TILT: the phone leaning (or the mouse) leans the wall a few pixels ── */
   var tilt = { x: 0, y: 0, tx: 0, ty: 0 }, askedTilt = false;
   addEventListener('deviceorientation', function (e) {
@@ -506,54 +645,66 @@
     if (D && typeof D.requestPermission === 'function') D.requestPermission().catch(function () {});
   }
 
-  /* ── TOUCH AND MOUSE. A tap on a cartridge lights it; a tap on the lit one opens it (so does the button).
-     A mouse lights whatever it rests on, so one click opens. A sideways swipe anywhere steps to the next
-     cartridge. touch-action:none on the body keeps the browser's own swipe out of it. ── */
-  var px0 = 0, py0 = 0, downT = 0, pid = null, downSel = -1;
+  /* ── TOUCH AND MOUSE. Touching a cartridge lights it; carrying it (a press that moves) lifts it, and letting go
+     over the handheld loads it. A mouse lights whatever it rests on. A sideways swipe that starts off the shelves
+     steps to the next cartridge. touch-action:none on the body keeps the browser's own swipe out of it.
+     ⚠ A TAP NO LONGER OPENS ANYTHING, and there is no button: the handheld is the only door (plus Enter). ── */
+  var px0 = 0, py0 = 0, downT = 0, pid = null, downI = -1, vy = 0, lastY = 0, lastT = 0;
   var booting = function () { return !!(window.odaIntro && window.odaIntro.on); };   /* the boot sheet is up: the shelves are not there yet */
   function cartAt(x, y) {
     var hit = document.elementsFromPoint(x, y).find(function (n) { return n.classList && n.classList.contains('cart'); });
     return hit ? +hit.dataset.i : -1;
   }
   function onDown(e) {
-    if (booting()) return;
-    if (e.target.closest && e.target.closest('.go, #snd')) return;
+    if (booting() || loading || pid !== null) return;
+    if (e.target.closest && e.target.closest('#snd')) return;
     askTilt();
-    pid = e.pointerId; px0 = e.clientX; py0 = e.clientY; downT = performance.now(); downSel = front;
+    pid = e.pointerId; px0 = e.clientX; py0 = lastY = e.clientY; downT = lastT = performance.now(); vy = 0;
+    downI = cartAt(e.clientX, e.clientY);
+    if (downI >= 0) select(downI);
+  }
+  function onMove(e) {
+    if (pid === null || e.pointerId !== pid || loading) return;
+    var t = performance.now(), dx = e.clientX - px0, dy = e.clientY - py0;
+    vy = vy * 0.6 + ((e.clientY - lastY) / Math.max(1, t - lastT)) * 0.4; lastY = e.clientY; lastT = t;
+    if (!held && downI >= 0 && Math.hypot(dx, dy) > 9) pick(downI);
+    if (held) moveHeld(held._home.x + dx, held._home.y + dy, 1.08);
   }
   function onUp(e) {
     if (pid === null || e.pointerId !== pid) return;
     pid = null;
     var dx = e.clientX - px0, dy = e.clientY - py0;
-    if (Math.hypot(dx, dy) < 10 && performance.now() - downT < 500) {      /* a tap */
-      var i = cartAt(e.clientX, e.clientY);
-      if (i >= 0) { if (i === downSel) play(i); else select(i); }
+    if (held) {
+      var d = $('deck').getBoundingClientRect(), cy = held._y + held._home.h / 2, reach = d.top - (held._home.y + held._home.h / 2);
+      /* in: its middle has reached the handheld, or it was thrown downward and is already most of the way there */
+      if (cy >= d.top - held._home.h * 0.25 || (vy > 0.9 && dy > reach * 0.45)) load(heldI); else drop();
       return;
     }
-    if (Math.abs(dx) > 36 && Math.abs(dx) > Math.abs(dy) * 1.3) select(front + (dx < 0 ? 1 : -1));   /* a swipe */
+    if (downI < 0 && Math.abs(dx) > 36 && Math.abs(dx) > Math.abs(dy) * 1.3) select(front + (dx < 0 ? 1 : -1));   /* a swipe */
   }
   addEventListener('pointerdown', onDown);
+  addEventListener('pointermove', onMove);
   addEventListener('pointerup', onUp);
-  addEventListener('pointercancel', function () { pid = null; });
+  addEventListener('pointercancel', function (e) { if (e.pointerId === pid) { pid = null; if (held && !loading) drop(); } });
   addEventListener('pointerover', function (e) {
-    if (e.pointerType !== 'mouse' || booting() || pid !== null) return;
+    if (e.pointerType !== 'mouse' || booting() || pid !== null || loading) return;
     var c = e.target.closest && e.target.closest('.cart'); if (c) select(+c.dataset.i);
   });
   document.addEventListener('touchmove', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
   var wheelT = 0;
   addEventListener('wheel', function (e) {                       /* a trackpad or mouse wheel steps along too */
-    if (booting()) return;
+    if (booting() || loading) return;
     var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY, t = performance.now();
     if (Math.abs(d) < 8 || t - wheelT < 260) return;
     wheelT = t; select(front + (d > 0 ? 1 : -1));
   }, { passive: true });
   document.addEventListener('keydown', function (e) {
-    if (!N) return;
+    if (!N || loading) return;
     if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); select(front - 1); }
     else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); select(front + 1); }
     else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { e.preventDefault(); vert(-1); }
     else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { e.preventDefault(); vert(1); }
-    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); play(front); }
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); load(front); }
   });
 
   /* ── THE MUSIC: Odaroo's own track, looping under the arcade. A browser will not play sound before the
