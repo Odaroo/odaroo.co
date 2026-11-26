@@ -2,390 +2,615 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Odaroo &amp; Co. | The Player's Paper</title>
+<title>Odaroo &amp; Co.</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#d8281e">
-<meta name="description" content="Odaroo &amp; Co.: a one-person game label. Six original cartridges that play right in your browser, plus the videos, the stream, the music and the Discord.">
-<meta property="og:title" content="Odaroo &amp; Co. | The Player's Paper">
-<meta property="og:description" content="Six original cartridges that play right in your browser.">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Odaroo: an artist's portfolio. Video, live streams and music up top, and six original games that play right here in the browser.">
+<meta property="og:title" content="Odaroo">
+<meta property="og:description" content="Artist portfolio: video, live, music, and six original games that play in the browser.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://odaroo.co/">
-<meta property="og:image" content="https://odaroo.co/art/share.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://odaroo.co/art/share.jpg">
-<link rel="icon" type="image/png" href="art/favicon-32.png">
-<link rel="apple-touch-icon" href="art/apple-touch-icon.png">
-<link rel="preload" href="fonts/PressStart2P-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="paper.css?v=3">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Odaroo &amp; Co.">
+<!-- ⭐⭐ 2026-10-12 — THE ARCADE IS THE ONE THING THAT INSTALLS (Odaroo: "completely remove the fact that you
+     could install this game directly on your phone… only ask… at the beginning of play.odaroo.co… download
+     the arcade as a whole"). This REVERSES the 10-06 note below about the manifest and the install card:
+     the arcade has a manifest (scope = the whole site, so every game opens inside the installed app) and
+     asks to be installed a moment after it opens, every visit, lifting away after 14s. The GAMES no longer
+     carry a manifest or an install card of their own; they still go full screen on the first tap.
+     Still no fullscreen for the arcade page itself.
+     (Original, 10-06:) THE ARCADE IS A LANDING PAGE, NOT AN APP: no install card, no manifest, no
+     fullscreen. Only the GAMES install and go full screen.
+     ⭐ 2026-10-12 — BUT IT DOES OPEN OFFLINE ONCE A GAME HAS BEEN PLAYED (Odaroo: "available offline…
+     downloaded when the user plays one game… don't let the user download useless things if he just
+     joins"). sw.js beside this page is registered only after a game is launched (play(), below, sets
+     odaroo.arcade.played); a visitor who only looks around gets nothing extra. Nothing on screen says so.
+     ⚠ An earlier build's worker only trusted a page naming app-shell.js; naming that file in this comment
+     still lets such a phone accept this page once, and the new sw.js then replaces that worker. -->
+<script>
+  var ODA_PLAYED = 'odaroo.arcade.played';
+  /* ⭐ 2026-11-26 — THIS SAME FILE IS ALSO odaroo.co's FRONT PAGE (GitHub Pages, repo Odaroo/odaroo.co; copied there by
+     tools/sync-front.cjs). On that host there is no worker to register and no games.json beside it: the page asks
+     play.odaroo.co for the list and sends every game there. */
+  var ODA_BARE = /^(www\.)?odaroo\.co$/i.test(location.hostname);
+  function odaKeep() { if (ODA_BARE) return Promise.resolve(); try { return navigator.serviceWorker.register('sw.js'); } catch (e) { return Promise.resolve(); } }
+  /* launched from the home screen: it IS the downloaded arcade, so it keeps itself like a played one */
+  var ODA_APP = false; try { ODA_APP = matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || navigator.standalone === true; } catch (e) {}
+  if ('serviceWorker' in navigator && !/[?&]dev\b/.test(location.search)) {
+    var odaP = false; try { odaP = localStorage.getItem(ODA_PLAYED) === '1'; } catch (e) {}
+    if (odaP || ODA_APP) addEventListener('load', function () { odaKeep().catch(function () {}); });
+  }
+  /* the installed arcade takes the whole screen on a tap (a home-screen copy made before the manifest said
+     "fullscreen" still shows the phone's bars until the phone refreshes it) — the games do the same */
+  function odaFsOn() { return !!(document.fullscreenElement || document.webkitFullscreenElement) || matchMedia('(display-mode: fullscreen)').matches; }
+  function odaGoFull() {
+    if (!ODA_APP || odaFsOn()) return;
+    var d = document.documentElement, rq = d.requestFullscreen || d.webkitRequestFullscreen;
+    if (rq) { try { var p = rq.call(d, { navigationUI: 'hide' }); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+  }
+  /* ⭐ 2026-10-17 — BACK FROM A GAME STARTS OVER (Odaroo: "go back to it, it starts again from the beginning").
+     A browser may hand the page back from its back/forward memory, frozen mid-song and mid-ring; reload it. */
+  addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
+  addEventListener('pointerdown', odaGoFull, true); addEventListener('pointerup', odaGoFull, true);
+  /* the browser offers the install ONCE, early: catch it here, in the head, and keep it for the card */
+  var odaBip = null;
+  /* ⭐ 2026-10-18 — NO INSTALL CARD (Odaroo). The browser's offer is still caught and held so Chrome does not slide
+     its own install bar in over the opening either; installing stays possible from the browser's menu. */
+  addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); odaBip = e; });
+  addEventListener('appinstalled', function () {
+    odaBip = null; try { localStorage.setItem(ODA_PLAYED, '1'); } catch (e) {}
+    odaKeep().catch(function () {});           /* installed = the whole arcade is kept on the phone */
+  });
+</script>
+<style>
+  /* ⭐⭐⭐ 2026-11-26 — THE PORTFOLIO: THE OUTLETS ON TOP, THE GAMES BELOW (Odaroo: "play.odaroo.co is going to be my
+     professional portfolio… as an artist, showcasing the main outlets at the top. At the bottom, we have all the
+     games… in order of creation, first with Inkville and Edgework at the end"). This REPLACES the 10-09 orbit: no
+     ring any more. Two shelves of cartridges that stay where they are — YouTube, Twitch, Bandcamp, SoundCloud and
+     the Discord LAST (the community) — then every game, oldest first. One cartridge is lit at a time; its name, a
+     line about it and the button sit underneath. Tap a cartridge to light it, tap it again (or the button) to go.
+     Still plain black behind, still no invented artwork (the cartridges are the games' own icons and the brands'
+     real logos), still one small speaker in the corner. The element keeps the id "orbit" ON PURPOSE: the arcade's
+     offline worker (sw.js, and older copies of it on phones) only trusts a page that names it. */
+  @font-face { font-family: 'Syncopate'; font-weight: 400; src: url('fonts/Syncopate-Regular.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'Syncopate'; font-weight: 700; src: url('fonts/Syncopate-Bold.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'VT323'; src: url('fonts/VT323-Regular.woff2') format('woff2'); font-display: swap; }
+  :root {
+    --ink: #f3eee6; --muted: #a49db0; --c: #ff3d3d;
+    --wide: 'Syncopate', 'Helvetica Neue', Arial, sans-serif; --mono: 'VT323', 'Courier New', monospace;
+    --gap: clamp(6px, 1.6vw, 16px);
+    /* an upright screen: five outlets across, the games three across (two rows of three) */
+    --oc: min(calc((100vw - 44px - 4 * var(--gap)) / 5), 11.5dvh, 124px);
+    --gz: min(calc((100vw - 44px - 2 * var(--gap)) / 3), 11.5dvh, 124px);
+    --gcols: 3;
+    color-scheme: dark;
+  }
+  /* a sideways or desktop screen: the games stand in ONE row, in order */
+  @media (min-aspect-ratio: 1/1) {
+    :root { --oc: min(calc((100vw - 44px - 5 * var(--gap)) / 6), 15dvh, 132px); --gz: var(--oc); --gcols: 6; }
+  }
+  html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; background: #000; color: var(--ink); }
+  body { height: 100dvh; display: flex; flex-direction: column; -webkit-tap-highlight-color: transparent; font-family: var(--wide);
+         touch-action: none; user-select: none; -webkit-user-select: none; }
+
+  /* the wall: the name, then the two shelves. It leans a few pixels with the phone's tilt (or the mouse). */
+  #orbit { position: relative; z-index: 2; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; align-items: center;
+           justify-content: center; gap: clamp(8px, 2.4dvh, 26px); will-change: transform;
+           padding: max(14px, calc(env(safe-area-inset-top) + 8px)) 22px 0; }
+  #mast { text-align: center; line-height: 1; }
+  #mast b { display: block; font-weight: 700; font-size: clamp(16px, 3.6vmin, 26px); letter-spacing: .5em; margin-right: -.5em; }
+  #mast i { display: block; margin-top: .45em; font-style: normal; font-family: var(--mono); font-size: clamp(15px, 2.8vmin, 20px);
+            letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+  .shelf { display: flex; flex-direction: column; align-items: center; gap: clamp(5px, 1.2dvh, 12px); }
+  .shelf h2 { margin: 0; display: flex; align-items: center; gap: 12px; font: 400 clamp(15px, 2.7vmin, 19px)/1 var(--mono);
+              letter-spacing: .3em; text-transform: uppercase; color: var(--muted); }
+  .shelf h2::before, .shelf h2::after { content: ''; width: clamp(18px, 7vw, 70px); height: 1px; background: #ffffff38; }
+  .row { display: grid; gap: var(--gap); justify-content: center; }
+  #rowOut { --cart: var(--oc); grid-template-columns: repeat(5, var(--cart)); }
+  #rowGames { --cart: var(--gz); grid-template-columns: repeat(var(--gcols), var(--cart)); }
+
+  /* a cartridge. The lit one (.sel) is full strength, a size up, glowing in its own colour; the rest stand back. */
+  .cart { position: relative; width: var(--cart); height: var(--cart); cursor: pointer; opacity: .62;
+          transition: opacity .25s ease, scale .28s cubic-bezier(.2, 1.5, .4, 1); }
+  .cart.sel { opacity: 1; scale: 1.14; z-index: 2; }
+  /* it FLOATS a little: independent translate/rotate, so it composes with the lit one's scale */
+  .bob { width: 100%; height: 100%; animation: bob 4.2s ease-in-out infinite; }
+  .cart:nth-child(3n) .bob { animation-duration: 5.4s; animation-delay: -3.2s; }
+  .cart:nth-child(3n+2) .bob { animation-duration: 4.9s; animation-delay: -1.7s; }
+  .cart:nth-child(4n+1) .bob { animation-duration: 4.6s; animation-delay: -2.4s; }
+  @keyframes bob { 0%, 100% { translate: 0 -2.5%; rotate: -1.6deg; } 50% { translate: 0 2.5%; rotate: 1.6deg; } }
+  .cart img { display: block; width: 100%; height: 100%; image-rendering: pixelated; -webkit-user-drag: none; pointer-events: none;
+              filter: drop-shadow(0 0 calc(var(--cart) * .05) color-mix(in srgb, var(--gc, #fff) 50%, transparent)); }
+  .cart.sel img { filter: drop-shadow(0 0 calc(var(--cart) * .1) var(--gc, #fff)); }
+  .cart img.blend { mix-blend-mode: screen; filter: none; }
+  /* AFTER THE BOOT THE CARTRIDGES LAND ONE BY ONE (2026-10-13, a Mario All-Stars select screen), now in reading
+     order: the outlets left to right, then the games oldest first. body.ringwait hides everything under the boot;
+     body.ringin drops each cartridge in on its own beat (--k), then the card arrives. The img is what animates
+     (scale/opacity) — .cart's own scale is the lit one's and .bob's translate/rotate the float. */
+  body.ringwait .cart img, body.ringwait #info, body.ringwait #mast, body.ringwait .shelf h2 { opacity: 0; }
+  body.ringin .cart img { animation: cartIn .46s cubic-bezier(.2, 1.5, .4, 1) both; animation-delay: calc(var(--k, 0) * 170ms); }
+  body.ringin #mast, body.ringin .shelf h2 { animation: infoIn .5s ease both; }
+  body.ringin #info { animation: infoIn .5s ease both; animation-delay: calc(var(--kn, 6) * 170ms + 250ms); }
+  @keyframes cartIn { 0% { opacity: 0; scale: .2; } 60% { opacity: 1; scale: 1.12; } 100% { opacity: 1; scale: 1; } }
+  @keyframes infoIn { from { opacity: 0; translate: 0 12px; } to { opacity: 1; translate: 0 0; } }
+
+  /* the lit cartridge's card: what it is (one word), its name, one line, and the button */
+  #info { position: relative; z-index: 3; flex: 0 0 auto; text-align: center;
+          padding: clamp(8px, 2dvh, 22px) 20px max(24px, calc(env(safe-area-inset-bottom) + 16px)); }
+  .more { animation: moreIn .3s ease both; }
+  @keyframes moreIn { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
+  .kind { margin: 0 0 .45em; font-family: var(--mono); font-size: clamp(15px, 2.7vmin, 19px); line-height: 1; letter-spacing: .3em;
+          margin-right: -.3em; color: var(--c); text-transform: uppercase; }
+  h1 { margin: 0 0 .3em; font-weight: 700; line-height: 1; letter-spacing: .08em; font-size: clamp(20px, min(6.6vw, 5dvh), 52px);
+       text-shadow: 0 4px 30px rgba(0,0,0,.8); overflow-wrap: anywhere; }
+  .tag { font-family: var(--mono); font-size: clamp(18px, 3.4vmin, 24px); line-height: 1.1; color: #e2dbea; max-width: 36ch;
+         margin: 0 auto clamp(10px, 2dvh, 22px); min-height: 2.2em; text-shadow: 0 2px 12px #000; }
+  .tag .rt { display: inline-block; margin-left: 8px; padding: 0 5px; border: 1px solid var(--c); color: var(--c); font-size: .85em; line-height: 1.2; }
+  .go { all: unset; display: inline-flex; align-items: center; gap: 14px; cursor: pointer; color: #000; background: var(--c);
+        padding: clamp(11px, 2dvh, 15px) clamp(26px, 6vw, 40px); font-weight: 700; font-size: clamp(11px, 2.6vmin, 14px); letter-spacing: .4em;
+        transition: background .4s, transform .15s; box-shadow: 0 0 28px color-mix(in srgb, var(--c) 45%, transparent); }
+  .go:active { transform: scale(.97); }
+  .go:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+  .go svg { width: 12px; height: 12px; }
+  /* a short screen (a phone on its side): the words step back so both shelves and the button still fit */
+  @media (max-height: 540px) {
+    #mast i, .kind { display: none; }
+    #orbit { gap: 6px; } .shelf { gap: 3px; }
+    .tag { min-height: 1.1em; margin-bottom: 8px; max-width: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #info { padding-top: 4px; padding-bottom: max(10px, calc(env(safe-area-inset-bottom) + 6px)); }
+  }
+
+  /* THE MUSIC (Odaroo, 2026-10-09: "add my own track to play in the background"). The one thing in a
+     corner: a small speaker to turn it off and on, faint until touched. */
+  /* (2026-10-18: the install card is gone — Odaroo: "completely remove the install shortcut on top, because it
+     removes from the effect". The arcade can still be added from the browser's own menu.) */
+  #snd { all: unset; position: fixed; z-index: 4; top: max(14px, calc(env(safe-area-inset-top) + 10px)); right: max(14px, calc(env(safe-area-inset-right) + 10px));
+         width: 40px; height: 40px; display: grid; place-items: center; cursor: pointer; opacity: .55; transition: opacity .2s; color: var(--ink); }
+  #snd:hover, #snd:focus-visible { opacity: 1; }
+  #snd:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; border-radius: 50%; }
+  #snd svg { width: 22px; height: 22px; }
+  #snd .x { display: none; } #snd.off .x { display: inline; } #snd.off .w { display: none; }
+
+  /* THE BOOT (2026-10-13): the Odaroo & Co. cartridge, the same sheet as Lunatide's and Chrome Animals'
+     (their #intro styles, copied). It is in the page from the first paint, so nothing shows before it. */
+  @font-face { font-family: 'ODPixel'; src: url('fonts/PressStart2P-Regular.woff2') format('woff2'); font-display: block; }
+  @font-face { font-family: 'ODJp'; src: url('fonts/DotGothic16-intro.woff2') format('woff2'); font-display: swap; }  /* only タップしてロード */
+#intro { --ibs: 1; position: fixed; inset: 0; z-index: 60; display: flex; background: #000; overflow: hidden; touch-action: none;
+  align-items: center; justify-content: center; font-family: 'ODPixel', 'Courier New', monospace; }
+#intro::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .6s; background: repeating-linear-gradient(0deg, #0000 0 2px, #ffffff0d 2px 4px); }
+#intro:has(#introCard)::before { opacity: .6; }   /* pure black for the first three seconds; the scanlines come with the squares */
+#intro.fadeout { animation: introFade 1s ease-in forwards; pointer-events: none; }
+@keyframes introFade { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+/* the boot column: cartridge, arrow, handheld, hint */
+  margin-top: calc(9px * var(--ibs)); font-size: var(--ibEN); color: #eef2f6; letter-spacing: .11em; text-align: center; white-space: nowrap;
+/* the studio mark: nine pixel tiles, O D A / R O O / & C O. */
+#introCard { position: absolute; inset: 0; z-index: 4; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+#intro.fadeout #introCard { animation: presOut .9s ease-in forwards; }
+@keyframes presOut { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.03); opacity: 0; } }
+#introLogo { --odct: clamp(32px, min(13.1vmin, 16vh), 65px); display: grid; grid-template-columns: repeat(3, var(--odct)); grid-auto-rows: var(--odct); gap: calc(var(--odct) * .13); perspective: 800px; }
+.odc-tile { position: relative; opacity: 0; background: #0d1018; border: calc(var(--odct) * .075) solid #eef2f8; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 0 0 calc(var(--odct) * .045) #0d1018, 0 0 calc(var(--odct) * .22) #9fd0ff33; }
+.odc-tile span { position: relative; font-size: calc(var(--odct) * .46); line-height: 1; color: #eef2f8; text-shadow: calc(var(--odct) * .035) calc(var(--odct) * .035) 0 #05040a; transform: translateY(calc(var(--odct) * .02)); }
+.odc-tile i { position: absolute; left: 100%; bottom: 0; font-style: normal; font-size: .62em; margin-left: .06em; }
+#introLogo.show .odc-tile { animation: odcTileIn .34s steps(3) forwards; animation-delay: calc(var(--i) * 32ms); }
+@keyframes odcTileIn { 0% { opacity: 0; transform: scale(.55); filter: brightness(3); } 55% { opacity: 1; transform: scale(1.1); filter: brightness(1.8); } 100% { opacity: 1; transform: scale(1); filter: none; } }
+#introLogo.show .odc-tile.spin { animation: odcFlip .38s cubic-bezier(.45, .05, .3, 1) forwards; }
+@keyframes odcFlip {
+  0% { opacity: 1; transform: rotateY(0deg); background-color: #0d1018; box-shadow: inset 0 0 0 calc(var(--odct) * .045) #0d1018; }
+  24.9% { opacity: 1; transform: rotateY(90deg); background-color: #0d1018; box-shadow: inset 0 0 0 calc(var(--odct) * .045) #0d1018; }
+  25% { opacity: 1; transform: rotateY(90deg); background-color: #4CAF50; box-shadow: inset 0 0 0 calc(var(--odct) * .045) #4CAF50; }
+  100% { opacity: 1; transform: rotateY(360deg); background-color: #4CAF50; box-shadow: inset 0 0 0 calc(var(--odct) * .045) #4CAF50; } }
+#introLogo.show .odc-tile.inv { animation: odcInv .7s steps(1) forwards; }
+@keyframes odcInv {
+  0% { opacity: 1; background-color: #eef2f8; box-shadow: inset 0 0 0 calc(var(--odct) * .045) #eef2f8; }
+  8% { opacity: 1; background-color: #4CAF50; box-shadow: inset 0 0 0 calc(var(--odct) * .045) #4CAF50; }
+  16%, 100% { opacity: 1; background-color: #eef2f8; box-shadow: inset 0 0 0 calc(var(--odct) * .045) #eef2f8; } }
+#introLogo.show .odc-tile.inv span { color: #0d1018; text-shadow: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .bg, .bob, .more { animation: none !important; }
+  }
+</style>
 </head>
 <body>
+<div id="intro"></div>
+<script>
+/* ── THE BOOT (Odaroo, 2026-10-13: "when play.odaroo.co is installed, make sure that it doesn't start
+   right away. The screen stays blank, and you have the regular intro… the one where you hear a chime
+   with the Odaroo & Co. intro… the same intro for the website"). The Odaroo & Co. cartridge, beat for
+   beat the one Lunatide and Chrome Animals open with (lunatide/js/intro.js — itself Inkville's boot).
+   ⚠ 2026-10-17: the cartridge, the handheld and TAP TO LOAD are GONE from this page (see below) — only
+   the studio card is left. What follows is the original 10-13 description:
+   a glitching cartridge turns over a handheld, TAP TO LOAD; the tap plays the "mystery solved" chime and
+   starts the arcade's song; the cartridge drops in, the handheld spins, the camera dives in; O D A /
+   R O O / & C O. land with the coin, the O-O-O diagonal turns green with the connect chime, and the
+   sheet dissolves onto the ring. The mark inside the cartridge is the arcade's own (its app icon's
+   play arrow). Mash-proof: only the first tap counts and nothing skips it.
+   It plays ONCE PER VISIT: coming back from a game in the same tab or app (sessionStorage) goes straight
+   to the ring where it was left — the 10-12 "coming back continues" rule. `?nointro` skips it (harnesses). */
+(function () {
+  'use strict';
+  /* ⭐ 2026-10-17 (later) — IT PLAYS ON EVERY OPEN, RELOAD AND RETURN (Odaroo: "whenever you reload the page or
+     go back to it, it starts again from the beginning"). The once-per-visit skip is gone; ?nointro is for harnesses. */
+  var skip = /[?&]nointro\b/.test(location.search);
+  try { sessionStorage.removeItem('odaroo.arcade.booted'); } catch (e) {}
+  var IN = window.odaIntro = { on: !skip, done: skip, wait: [] };
+  IN.then = function (f) { if (IN.done) f(); else IN.wait.push(f); };
+  var el = document.getElementById('intro');
+  if (skip) { if (el) el.parentNode.removeChild(el); return; }
 
-<!-- ───────── TICKER ───────── -->
-<div class="ticker" aria-hidden="true"><div class="ticker-run">
-  <span>ODAROO &amp; CO.</span><span>SIX CARTRIDGES</span><span>NOTHING TO INSTALL</span><span>PLAYS IN YOUR BROWSER</span><span>PHONE · DESKTOP · CONTROLLER · VR</span><span>EVERY GAME AN ORIGINAL</span>
-  <span>ODAROO &amp; CO.</span><span>SIX CARTRIDGES</span><span>NOTHING TO INSTALL</span><span>PLAYS IN YOUR BROWSER</span><span>PHONE · DESKTOP · CONTROLLER · VR</span><span>EVERY GAME AN ORIGINAL</span>
-</div></div>
+  var TILES = ['O', 'D', 'A', 'R', 'O', 'O', '&amp;', 'C', 'O<i>.</i>'];
+  /* the boot's own sound chip, the same tones and loudness as the games' */
+  var ac = null;
+  /* ⭐ 2026-10-28 — THE CHIMES MUST BE HEARD (Odaroo: "when you start odaroo.co… you hear a ding, like the other
+     animations"). The song plays under the squares by then, so the boot's chimes are LOUDER than the games' (BOOT_GAIN),
+     and a chime is never silently dropped because the sound chip is asleep: each one is ALSO rendered ahead of time
+     into a tiny WAV (OfflineAudioContext — no permission needed to render) and played as an <audio>, the same kind of
+     player the song uses — so whenever the browser lets the song play, it lets the chime play too. */
+  var BOOT_GAIN = 0.75 * 0.55;
+  function voice(cx, at0, f, t0, dur, type, vol) {
+    var o = cx.createOscillator(), g = cx.createGain(), t = at0 + t0;
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(Math.max(0.0002, vol * BOOT_GAIN), t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(cx.destination); o.start(t); o.stop(t + dur + 0.05);
+  }
+  function tone(f, t0, dur, type, vol) { if (ac && ac.state === 'running') voice(ac, ac.currentTime, f, t0, dur, type, vol); }
+  var NOTES = {
+    connect: [[1318.5, 0, 0.16, 'triangle', 0.16], [1975.5, 0.075, 0.9, 'triangle', 0.15], [3951, 0.075, 0.6, 'sine', 0.05], [2637, 0.16, 0.7, 'sine', 0.05]],
+    coin: [[987.77, 0, 0.09, 'square', 0.12], [1318.5, 0.08, 0.5, 'square', 0.11], [2637, 0.08, 0.34, 'sine', 0.04]]
+  };
+  var WAV = {};
+  function wavURL(buf) {
+    var d = buf.getChannelData(0), n = d.length, b = new DataView(new ArrayBuffer(44 + n * 2)), i;
+    function str(o, s) { for (var k = 0; k < s.length; k++) b.setUint8(o + k, s.charCodeAt(k)); }
+    str(0, 'RIFF'); b.setUint32(4, 36 + n * 2, true); str(8, 'WAVEfmt '); b.setUint32(16, 16, true); b.setUint16(20, 1, true);
+    b.setUint16(22, 1, true); b.setUint32(24, buf.sampleRate, true); b.setUint32(28, buf.sampleRate * 2, true);
+    b.setUint16(32, 2, true); b.setUint16(34, 16, true); str(36, 'data'); b.setUint32(40, n * 2, true);
+    for (i = 0; i < n; i++) b.setInt16(44 + i * 2, Math.max(-1, Math.min(1, d[i])) * 32767, true);
+    return URL.createObjectURL(new Blob([b.buffer], { type: 'audio/wav' }));
+  }
+  try {
+    var OC = window.OfflineAudioContext;
+    if (OC) Object.keys(NOTES).forEach(function (k) {
+      var sr = 22050, oc = new OC(1, Math.ceil(sr * 1.1), sr);
+      NOTES[k].forEach(function (v) { voice(oc, 0, v[0], v[1], v[2], v[3], v[4]); });
+      var r = oc.startRendering(); if (r && r.then) r.then(function (buf) { WAV[k] = new Audio(wavURL(buf)); WAV[k].preload = 'auto'; }, function () {});
+    });
+  } catch (e) {}
+  function chime(k) {
+    wake();
+    if (ac && ac.state === 'running') { NOTES[k].forEach(function (v) { tone(v[0], v[1], v[2], v[3], v[4]); }); return; }
+    var a = WAV[k];
+    if (a) { try { a.currentTime = 0; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+  }
+  function sndConnect() { chime('connect'); }
+  function sndCoin() { chime('coin'); }
+  IN.sounds = { mystery: 0, coin: 0, connect: 0, tick: 0 };
+  IN.tick = function (k) { IN.sounds.tick++; tone(659.25 * Math.pow(2, k / 12), 0, 0.07, 'square', 0.07); tone(1318.5 * Math.pow(2, k / 12), 0.03, 0.12, 'sine', 0.03); };   /* counted, so a harness can hear the chime */
+  /* ⭐ 2026-10-17 — NO CARTRIDGE, NO TAP TO LOAD (Odaroo: "remove the cartridge animation insert or tap to
+     load, and just have the Odaroo… two cartridges are confusing" — the cartridges come later, on the ring).
+     A moment of black, then the nine tiles O D A / R O O / & C O. land with the coin, the O-O-O diagonal
+     turns green, and ON THE CONNECT CHIME the song starts (it has been loading since the page opened —
+     the main script calls bgm.load() first thing, so a slow browser has the whole animation to fetch it).
+     Then the sheet dissolves and the cartridges land one by one. No tap is needed anywhere; the installed
+     arcade asks for full screen on its first tap (odaGoFull, head script). */
+  try { var C = window.AudioContext || window.webkitAudioContext; if (C) ac = new C(); } catch (e) {}
+  var timers = [], state = 'playing';
+  function at(ms, f) { timers.push(setTimeout(f, ms)); }
+  function $(id) { return document.getElementById(id); }
+  function wake() { if (ac && ac.state !== 'running') { try { ac.resume(); } catch (e) {} } }
 
-<!-- ───────── THE BAR THAT STAYS ON TOP: logo left, QR right ───────── -->
-<nav class="topbar" aria-label="Sections">
-  <a class="tb-logo" href="#top" aria-label="Odaroo &amp; Co., back to the top">
-    <span class="logo sm" aria-hidden="true"><span class="tile inv">O</span><span class="tile">D</span><span class="tile">A</span><span class="tile">R</span><span class="tile inv">O</span><span class="tile">O</span><span class="tile">&amp;</span><span class="tile">C</span><span class="tile inv">O<i>.</i></span></span>
-    <b>ODAROO &amp; CO.</b>
-  </a>
-  <div class="tb-links">
-    <a href="#scene" style="--c:#ffd23f">Scene</a>
-    <a href="#inkville" style="--c:#ffd76a">Inkville</a>
-    <a href="#lunatide" style="--c:#7fd4ff">Lunatide</a>
-    <a href="#vrlabs" style="--c:#b79bff">VR Labs</a>
-    <a href="#lusolaos" style="--c:#7fb0ff">Lusolaos</a>
-    <a href="#chromeanimals" style="--c:#ff2a6d">Chrome Animals</a>
-    <a href="#edgework" style="--c:#e1061b">Edgework</a>
-  </div>
-  <a class="qr" href="https://odaroo.co/" aria-label="QR code: scan to open odaroo.co">
-    <img src="art/qr.svg" width="58" height="58" alt="">
-    <span class="qr-big" aria-hidden="true"><img src="art/qr.svg" width="200" height="200" alt=""><b>SCAN ME</b><i>odaroo.co</i></span>
-  </a>
-  <span class="tb-bar" aria-hidden="true"></span>
-</nav>
-
-<button id="snd" type="button" aria-label="Music off" title="Music: Odaroo, Catchphrases and Misunderstandings">
+  function finish() {
+    if (state === 'done') return; state = 'done';
+    timers.forEach(clearTimeout); timers = [];
+    el.classList.add('fadeout');
+    IN.on = false; IN.done = true;
+    var w = IN.wait; IN.wait = []; w.forEach(function (f) { try { f(); } catch (e) {} });
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 1000);
+  }
+  function studio() {
+    var card = document.createElement('div'); card.id = 'introCard';
+    card.innerHTML = '<div id="introLogo">' + TILES.map(function (c, i) { return '<div class="odc-tile" style="--i:' + i + '"><span>' + c + '</span></div>'; }).join('') + '</div>';
+    el.appendChild(card);
+    var logo = $('introLogo'), tiles = function () { return logo.querySelectorAll('.odc-tile'); };
+    wake();
+    at(300, function () { logo.classList.add('show'); IN.sounds.coin++; sndCoin(); });
+    [0, 4, 8].forEach(function (n, k) { at(900 + k * 220, function () { var t = tiles()[n]; if (t) t.classList.add('spin'); }); });
+    at(1720, function () {                          /* the third O is green: connected — and the song begins */
+      IN.sounds.connect++; sndConnect();
+      if (window.odaMusicOn) window.odaMusicOn();   /* one more ask for the song, in case the page's first was refused */
+    });
+    at(1740, function () { var t = tiles(); [0, 4, 8].forEach(function (n) { if (t[n]) t[n].classList.add('inv'); }); });
+    at(3400, finish);
+  }
+  /* ⭐ 2026-10-18 — THREE SECONDS OF BLACK FIRST (Odaroo: "the website starts all black for 3 seconds, and then you see
+     the odaroo.co loading… the song's already started"). The song is asked for the moment the page opens (main
+     script) and plays under the black; the squares land at 3s. */
+  IN.blackMs = 3000;
+  at(IN.blackMs, studio);
+  /* a sound chip a browser kept asleep wakes on the first touch or key (the chimes after it are heard) */
+  addEventListener('pointerdown', wake, true); addEventListener('pointerup', wake, true);
+  document.addEventListener('playing', wake, true);              /* the song is allowed to play, so the chip is too (media events reach a capture listener) */
+  addEventListener('keydown', function onKey(e) {
+    if (!IN.on) { removeEventListener('keydown', onKey, true); return; }
+    e.preventDefault(); e.stopPropagation(); wake();
+  }, true);
+})();
+</script>
+<main id="orbit">
+  <div id="mast"><b>ODAROO</b><i>Artist &middot; video, live, music, games</i></div>
+  <section class="shelf" aria-label="Where to find Odaroo"><h2>The outlets</h2><div class="row" id="rowOut"></div></section>
+  <section class="shelf" aria-label="The games, oldest first"><h2>The games</h2><div class="row" id="rowGames"></div></section>
+</main>
+<div id="info"></div>
+<audio id="bgm" src="audio/catchphrases-and-misunderstandings.mp3" loop preload="auto"></audio>
+<button id="snd" type="button" aria-label="Music off" title="Music: Odaroo — Catchphrases and Misunderstandings">
   <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path class="w" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="x" d="m16 9 6 6m0-6-6 6"/>
   </svg>
 </button>
 
-<div class="sheet">
 
-<!-- ───────── MASTHEAD ───────── -->
-<header class="mast" id="top">
-  <a class="logo" href="#top" aria-label="Odaroo &amp; Co.">
-    <span class="tile inv" style="--i:0">O</span><span class="tile" style="--i:1">D</span><span class="tile" style="--i:2">A</span>
-    <span class="tile" style="--i:3">R</span><span class="tile inv" style="--i:4">O</span><span class="tile" style="--i:5">O</span>
-    <span class="tile" style="--i:6">&amp;</span><span class="tile" style="--i:7">C</span><span class="tile inv" style="--i:8">O<i>.</i></span>
-  </a>
-  <div class="mast-words">
-    <p class="mast-kicker">The player's paper of a one-person game label</p>
-    <h1 class="mast-title"><span>ODAROO</span> <span class="amp">&amp;</span> <span>CO.</span></h1>
-    <p class="mast-sub">Original cartridges <b>★</b> Soundtracks <b>★</b> Worlds in motion</p>
-  </div>
-  <div class="burst mast-burst" aria-hidden="true"><span>FREE<small>TO PLAY</small></span></div>
-</header>
-<div class="dateline">
-  <span>VOL. 1 · No. 1</span><span>EST. 2026</span><span class="hide-s">ALL GAMES PLAY IN THE BROWSER</span><span>ODAROO.CO</span>
-</div>
+<!-- 2026-10-29 — every controller, mapped or not, plus a pad HUD that lights each press (padlink.js; ONE file, copied unchanged from play/js/) -->
+<script>window.PADLINK_CFG = { hud: true, keys: function (k) { return k === 'left' || k === 'right' || k === 'up' || k === 'down' || k === 'A' || k === 'START'; } };</script>
+<script src="js/padlink.js"></script>
+<script>
+(function () {
+  'use strict';
+  /* the art for each cartridge. A game's is its home-screen icon; an outlet's is the brand's real logo in the
+     same shell (tools/arcade-rec/logo-carts.mjs). */
+  var ART = {
+    youtube:       { cart: 'art/cart-youtube.png' },
+    twitch:        { cart: 'art/cart-twitch.png' },
+    bandcamp:      { cart: 'art/cart-bandcamp.png' },
+    soundcloud:    { cart: 'art/cart-soundcloud.png' },
+    discord:       { cart: 'art/cart-discord.png' },
+    inkville:      { cart: 'art/cart-inkville.png' },
+    lunatide:      { cart: 'art/cart-lunatide.png' },
+    chromeanimals: { cart: 'art/cart-chromeanimals.png' },
+    vrlabs:        { cart: 'art/cart-vrlabs.png' },        /* the regular cartridge, a Steam Frame-style headset silhouette inside (tools/make-vrlabs-art.cjs) */
+    lusolaos:      { cart: 'art/cart-lusolaos.png' },      /* the regular cartridge, the tile flower inside (tools/make-lusolaos-art.cjs) */
+    edgework:      { cart: 'art/cart-edgework.png' }       /* the regular cartridge, a dagger inside (tools/make-edgework-art.cjs) */
+  };
+  /* ⭐⭐⭐ 2026-11-26 — THE TOP SHELF: ODAROO'S OUTLETS, IN THIS ORDER (Odaroo: "four cartridges that you see on top…
+     YouTube and a Twitch cartridge… a Bandcamp as well as a SoundCloud… the Discord cartridge last to connect as my
+     community"). This REVERSES two 10-09 notes: SoundCloud is BACK (soundcloud.com/odaroo), and the outlets wear
+     their own names again (the one-word VIDEO / AUDIO / COMMUNITY is now the small line above the name, `kind`).
+     They open in this same tab; the button says what you do there. The Twitch address is set in ONE place, here. */
+  var OUTLETS = [
+    { slug: 'youtube', href: 'https://www.youtube.com/@whoisodaroo', kind: 'Video', title: 'YOUTUBE', btn: 'WATCH', color: '#ff3d3d',
+      tagline: 'Visuals and captures. Worlds in motion.' },
+    { slug: 'twitch', href: 'https://www.twitch.tv/odaroo', kind: 'Live', title: 'TWITCH', btn: 'TUNE IN', color: '#a970ff',
+      tagline: 'Odaroo, live and unscripted.' },
+    { slug: 'bandcamp', href: 'https://odaroo.bandcamp.com/', kind: 'Audio', title: 'BANDCAMP', btn: 'LISTEN', color: '#3ec1d8',
+      tagline: 'Soundtracks and concept albums.' },
+    { slug: 'soundcloud', href: 'https://soundcloud.com/odaroo', kind: 'Audio', title: 'SOUNDCLOUD', btn: 'LISTEN', color: '#ff7a1a',
+      tagline: 'More music by Odaroo, streaming on SoundCloud.' },
+    { slug: 'discord', href: 'https://discord.gg/ENY6PbKT7f', kind: 'Community', title: 'DISCORD', btn: 'JOIN', color: '#7b86ff',
+      tagline: 'The Odaroo & Co. community. News, playtests, leaderboards and more.' }
+  ];
+  /* THE BOTTOM SHELF: the games in the order they were made, Inkville first and Edgework last. games.json (the
+     server) already lists them that way; this is the same list for a page opened with no server behind it. */
+  var FALLBACK = [
+    { slug: 'inkville', href: 'inkville/', title: 'INKVILLE', tagline: 'A rubberhose rumble. Collect the acts, play the arcade, battle online.', color: '#ffd76a', rating: '' },
+    { slug: 'lunatide', href: '/lunatide/', title: 'LUNATIDE', tagline: 'A dream-wind platformer under a tidal moon.', color: '#7fd4ff', rating: '' },
+    { slug: 'chromeanimals', href: 'chromeanimals/', title: 'CHROME ANIMALS', tagline: 'A neon-noir massacre. One hit kills. Pick a mask.', color: '#ff2a6d', rating: '18+' },
+    { slug: 'vrlabs', href: 'vrlabs/', title: 'VR LABS', tagline: 'Put on a headset: a lab of VR games you pick up with your hands. Moonrun, Moonstone Toss, Glove Range.', color: '#7fd4ff', rating: '' },
+    { slug: 'lusolaos', href: 'lusolaos/', title: 'LUSOLAOS', tagline: 'A river of painted tiles, from the Atlantic to the Mekong. Turn, swap, breathe. VR and AR inside.', color: '#7fb0ff', rating: '' },
+    { slug: 'edgework', href: 'edgework/', title: 'EDGEWORK', tagline: 'Hold the blades back, press the seal, never touch an edge. 24 nights, one clock, one chance.', color: '#e1061b', rating: '16+' }
+  ];
+  /* on the bare odaroo.co the games still open on play.odaroo.co, so a save lives in ONE place */
+  var BARE = /^(www\.)?odaroo\.co$/i.test(location.hostname);
 
-<!-- ───────── FRONT PAGE ───────── -->
-<section class="front">
-  <div class="front-main">
-    <p class="kicker red">Front page</p>
-    <h2 class="shout">Six cartridges.<br>One maker.<br><em>Nothing to install.</em></h2>
-    <p class="deck">Odaroo &amp; Co. is a maker's label run like a small studio. Every game in this paper is an original, and every one of them loads in the tab you are reading right now.</p>
-    <div class="cols">
-      <p class="dropcap">Welcome to the paper. Around here a release is a cartridge, and there are six on the rack: a 1930s cartoon card rumble, a dream-wind platformer, a lab you walk into with a headset on, a river of painted tiles, a neon-noir one-hit-kill, and a blade puzzle that needs both of your hands and possibly a friend.</p>
-      <p>Nothing needs a download, a launcher or an account. Pick a cartridge, press PLAY, and it starts. Phones, desktops, controllers and VR headsets are all welcome.</p>
-      <p>This issue opens with the scene (the videos, the stream, the music and the Discord) and then walks the whole rack, one cartridge at a time. Scroll slowly. The cartridges turn as you go, and the bar on top jumps anywhere.</p>
-    </div>
-    <p class="cta-row"><a class="btn" href="#rack">Go to the rack <span aria-hidden="true">▶</span></a> <a class="btn ghost" href="https://play.odaroo.co/">Open the arcade</a></p>
-    <p class="cue" aria-hidden="true">Scroll <span>&#9660;</span></p>
-  </div>
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var G = [], carts = [], N = 0, NO = 0, front = -1;
+  /* NOTHING IS REMEMBERED (2026-10-17): every open lights the first cartridge and plays the song from 0:00. */
+  try { localStorage.removeItem('odaroo.arcade.state'); } catch (e) {}
 
-  <aside class="contents">
-    <h3 class="boxhead">Jump to</h3>
-    <ol>
-      <li><a href="#scene"><b>The Scene</b><i>YouTube, Twitch, Bandcamp, Discord</i></a></li>
-      <li><a href="#inkville"><b>Inkville</b><i>A rubberhose rumble</i></a></li>
-      <li><a href="#lunatide"><b>Lunatide</b><i>Under a tidal moon</i></a></li>
-      <li><a href="#vrlabs"><b>VR Labs</b><i>Put on a headset</i></a></li>
-      <li><a href="#lusolaos"><b>Lusolaos</b><i>A river of painted tiles</i></a></li>
-      <li><a href="#chromeanimals"><b>Chrome Animals</b><i>One hit kills</i></a></li>
-      <li><a href="#edgework"><b>Edgework</b><i>Never touch an edge</i></a></li>
-    </ol>
-    <div class="rack" aria-label="The cartridges">
-      <a href="#inkville" class="cartstage mini"><div class="cart3d" data-slug="inkville" data-title="INKVILLE" style="--c:#ffd76a" data-ry="-28"></div></a>
-      <a href="#lunatide" class="cartstage mini"><div class="cart3d" data-slug="lunatide" data-title="LUNATIDE" style="--c:#7fd4ff" data-ry="-14"></div></a>
-      <a href="#vrlabs" class="cartstage mini"><div class="cart3d" data-slug="vrlabs" data-title="VR LABS" style="--c:#b79bff" data-ry="-4"></div></a>
-      <a href="#lusolaos" class="cartstage mini"><div class="cart3d" data-slug="lusolaos" data-title="LUSOLAOS" style="--c:#7fb0ff" data-ry="6"></div></a>
-      <a href="#chromeanimals" class="cartstage mini"><div class="cart3d" data-slug="chromeanimals" data-title="CHROME" style="--c:#ff2a6d" data-ry="16"></div></a>
-      <a href="#edgework" class="cartstage mini"><div class="cart3d" data-slug="edgework" data-title="EDGEWORK" style="--c:#e1061b" data-ry="28"></div></a>
-    </div>
-  </aside>
-</section>
+  /* the cartridges land one by one once the boot has dissolved, in reading order (the song started on the
+     connect chime; ringIn only asks again, which does nothing while it is already playing) */
+  var built = false, ringDone = false;
+  function ringIn() {
+    if (!built || ringDone || !(window.odaIntro && window.odaIntro.done)) return; ringDone = true;
+    var b = document.body;
+    if (!b.classList.contains('ringwait')) { musicOn(); return; }   /* no boot this visit: everything is already there */
+    carts.forEach(function (el, k) { el.style.setProperty('--k', k); setTimeout(function () { if (window.odaIntro.tick) window.odaIntro.tick(k); }, k * 170 + 160); });
+    b.style.setProperty('--kn', N);
+    b.classList.remove('ringwait'); b.classList.add('ringin');
+    setTimeout(musicOn, N * 170 + 350);                            /* (the song is already playing; this only retries a refused start) */
+  }
+  if (window.odaIntro && !window.odaIntro.done) document.body.classList.add('ringwait');
+  window.odaIntro.then(function () { setTimeout(ringIn, 350); });
 
-<!-- ───────── THE SCENE: the artist's pages ───────── -->
-<section class="scene" id="scene">
-  <div class="banner"><h2>The Scene</h2><p>Where Odaroo records, films, talks and plays</p></div>
+  function build(list) {
+    var games = list.filter(function (g) { return g && g.slug && g.href; });
+    G = OUTLETS.concat(games); N = G.length; NO = OUTLETS.length;
+    G.forEach(function (g, i) {
+      var a = ART[g.slug] || {};
+      var d = document.createElement('div');
+      d.className = 'cart'; d.dataset.i = i; d.setAttribute('role', 'button'); d.setAttribute('aria-label', g.title);
+      d.style.setProperty('--gc', g.color);
+      /* a game this page has no cartridge for (added after odaroo.co's copy was made): its art is asked of the arcade */
+      var src = a.cart || ((BARE ? 'https://play.odaroo.co/' : '') + 'art/cart-' + encodeURIComponent(g.slug) + '.png');
+      d.innerHTML = '<div class="bob"><img alt="' + esc(g.title) + '" draggable="false" src="' + esc(src) + '"></div>';
+      if (!a.cart) d.querySelector('img').addEventListener('error', function () { this.src = 'icons/icon-512.png'; this.className = 'blend'; }, { once: true });
+      $(i < NO ? 'rowOut' : 'rowGames').appendChild(d); carts.push(d);
+    });
+    select(0);                                                 /* always the first cartridge: YouTube */
+    built = true; ringIn();
+  }
 
-  <div class="scene-grid">
-    <a class="chan" href="https://www.youtube.com/@whoisodaroo" style="--c:#e62117" rel="noopener">
-      <span class="cartstage small"><span class="cart3d" data-slug="youtube" data-title="VIDEO" data-ry="-22"></span></span>
-      <span class="chan-k">Video</span><strong>YouTube</strong>
-      <span class="chan-t">Visuals and captures. Worlds in motion.</span>
-      <span class="chan-go">Watch <span aria-hidden="true">▶</span></span>
-    </a>
-    <!-- TWITCH: the channel address is set in ONE place, here. -->
-    <a class="chan" id="twitch" href="https://www.twitch.tv/odaroo" style="--c:#9146ff" rel="noopener">
-      <span class="cartstage small"><span class="cart3d" data-slug="twitch" data-title="LIVE" data-ry="18"></span></span>
-      <span class="chan-k">Live</span><strong>Twitch</strong>
-      <span class="chan-t">Odaroo, live and unscripted.</span>
-      <span class="chan-go">Tune in <span aria-hidden="true">▶</span></span>
-    </a>
-    <a class="chan" href="https://odaroo.bandcamp.com/" style="--c:#1da0c3" rel="noopener">
-      <span class="cartstage small"><span class="cart3d" data-slug="bandcamp" data-title="AUDIO" data-ry="-18"></span></span>
-      <span class="chan-k">Audio</span><strong>Bandcamp</strong>
-      <span class="chan-t">Soundtracks and concept albums.</span>
-      <span class="chan-go">Listen <span aria-hidden="true">▶</span></span>
-    </a>
-    <a class="chan" href="https://discord.gg/ENY6PbKT7f" style="--c:#5865f2" rel="noopener">
-      <span class="cartstage small"><span class="cart3d" data-slug="discord" data-title="COMMUNITY" data-ry="22"></span></span>
-      <span class="chan-k">Community</span><strong>Discord</strong>
-      <span class="chan-t">News, playtests, leaderboards and more.</span>
-      <span class="chan-go">Join <span aria-hidden="true">▶</span></span>
-    </a>
-  </div>
+  /* light cartridge i: its colour, and its card under the shelves */
+  function select(i) {
+    if (!N) return;
+    i = ((i % N) + N) % N; if (i === front) return;
+    if (carts[front]) carts[front].classList.remove('sel');
+    front = i; carts[i].classList.add('sel');
+    var g = G[i], kind = g.kind || ('Game ' + (i - NO + 1) + ' of ' + (N - NO));
+    document.documentElement.style.setProperty('--c', g.color);
+    $('info').innerHTML = '<div class="more" id="more"><p class="kind">' + esc(kind) + '</p><h1>' + esc(g.title) + '</h1>' +
+      '<p class="tag">' + esc(g.tagline || '') + (g.rating ? '<span class="rt">' + esc(g.rating) + '</span>' : '') + '</p></div>' +
+      '<button class="go" id="go" type="button">' + esc(g.btn || 'PLAY') + '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 0 L10 5 L1 10 Z" fill="currentColor"/></svg></button>';
+    $('go').addEventListener('click', function () { play(front); });
+  }
+  /* up / down: the cartridge on the next shelf (or row) that stands closest to this one */
+  function vert(dir) {
+    if (front < 0) return;
+    var r = carts[front].getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, best = -1, bd = 1e9;
+    carts.forEach(function (el, i) {
+      var q = el.getBoundingClientRect(), dy = (q.top + q.height / 2 - cy) * dir;
+      if (dy < r.height * 0.5) return;
+      var dd = dy * 3 + Math.abs(q.left + q.width / 2 - cx);
+      if (dd < bd) { bd = dd; best = i; }
+    });
+    if (best >= 0) select(best);
+  }
 
-  <div class="jukebox" id="jukebox">
-    <div class="juke-head"><h3>On the house stereo</h3><p>Two themes by Odaroo. The arcade theme plays as you read.</p></div>
-    <button class="track" type="button" data-src="audio/catchphrases-and-misunderstandings.mp3" aria-pressed="false">
-      <span class="play" aria-hidden="true"></span><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-      <span class="t-name">Catchphrases and Misunderstandings</span><span class="t-note">The arcade theme</span>
-    </button>
-    <button class="track" type="button" data-src="audio/trust.mp3" aria-pressed="false">
-      <span class="play" aria-hidden="true"></span><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-      <span class="t-name">Trust</span><span class="t-note">The Edgework theme</span>
-    </button>
-    <a class="juke-more" href="https://odaroo.bandcamp.com/" rel="noopener">More on Bandcamp ▶</a>
-    <audio id="deck" src="audio/catchphrases-and-misunderstandings.mp3" loop preload="auto"></audio>
-  </div>
-</section>
+  function hrefOf(g) {
+    var h = g.href;
+    if (BARE && h.charAt(0) !== 'h') h = 'https://play.odaroo.co/' + h.replace(/^\/+/, '');
+    return h;
+  }
+  function play(i) {
+    var g = G[i]; if (!g) return;
+    if (/^https?:/i.test(g.href)) { location.href = g.href; return; }   /* an outlet goes straight there, in this tab (2026-10-09) */
+    /* A game is being played: keep the arcade on the phone from now on (sw.js). The navigation waits a
+       moment for the worker to be registered; it installs on its own after that. (Chrome Animals asks for
+       its PIN itself, on every launch — play/chromeanimals/js/intro.js.) */
+    var url = hrefOf(g);
+    try { localStorage.setItem(ODA_PLAYED, '1'); } catch (e) {}
+    if (!('serviceWorker' in navigator)) { location.href = url; return; }
+    var gone = false, leave = function () { if (!gone) { gone = true; location.href = url; } };
+    odaKeep().then(leave, leave); setTimeout(leave, 700);
+  }
 
-<!-- ───────── THE RACK ───────── -->
-<div class="banner big" id="rack"><h2>The Rack</h2><p>Six cartridges, made by Odaroo. Start at the top.</p></div>
+  /* ── TILT: the phone leaning (or the mouse) leans the wall a few pixels ── */
+  var tilt = { x: 0, y: 0, tx: 0, ty: 0 }, askedTilt = false;
+  addEventListener('deviceorientation', function (e) {
+    if (e.gamma == null) return;
+    tilt.tx = Math.max(-1, Math.min(1, e.gamma / 28));
+    tilt.ty = Math.max(-1, Math.min(1, ((e.beta || 45) - 45) / 28));
+    kick();
+  });
+  addEventListener('mousemove', function (e) {
+    tilt.tx = (e.clientX / innerWidth - 0.5) * 1.6; tilt.ty = (e.clientY / innerHeight - 0.5) * 1.6; kick();
+  });
+  function askTilt() {                         /* iPhone only shares the tilt after a tap and a yes */
+    if (askedTilt) return; askedTilt = true;
+    var D = window.DeviceOrientationEvent;
+    if (D && typeof D.requestPermission === 'function') D.requestPermission().catch(function () {});
+  }
 
-<!-- INKVILLE -->
-<article class="spread" id="inkville" style="--c:#ffd76a;--cd:#b8860b">
-  <div class="spread-cart">
-    <div class="cartstage"><div class="cart3d" data-slug="inkville" data-title="INKVILLE" data-scroll></div></div>
-    <a class="btn play" href="https://play.odaroo.co/inkville/">Play Inkville <span aria-hidden="true">▶</span></a>
-    <dl class="specs">
-      <div><dt>Players</dt><dd>1, or 2 online</dd></div>
-      <div><dt>Collect</dt><dd>65 acts</dd></div>
-      <div><dt>Arcade</dt><dd>8 games + a vault</dd></div>
-      <div><dt>Plays on</dt><dd>Phone, desktop, controller</dd></div>
-    </dl>
-  </div>
-  <div class="spread-body">
-    <p class="folio">Card battler · Arcade collection</p>
-    <h2 class="title">Inkville</h2>
-    <p class="deck">A rubberhose rumble. Collect the acts, play the arcade, battle online.</p>
-    <div class="cols">
-      <p class="dropcap">It is the 1930s and the cartoon is made of ink. Inkville's stars are tabletop pieces come to life: chess men, checkers, playing cards, dice, poker chips and pool balls, collected as cards and sent out to rumble.</p>
-      <p>Around the card game sits a whole arcade. Eight games share one ladder: Tetr-Ink, Ice-Ink, Disc-Ink, Panel-Ink, Ink-Put!, Dance Dance Ink, Ink-Tar Hero and Lumen Ink, with the OCTA-THON locked in the vault until everything else is open. Win cups to unlock the next game, earn XP to level your Inklet, then take it online.</p>
-      <p>Every drawing and every note of music is generated in code.</p>
-    </div>
-    <div class="panels p-ink">
-      <figure class="panel wide"><div class="still kb"><img src="img/inkville-1.jpg" width="1100" height="619" alt="Inkville title screen: a white Inklet over a cream sunburst" loading="lazy"></div><figcaption>Curtain up</figcaption></figure>
-      <figure class="panel tall tilt-l"><div class="still kb2"><img src="img/inkville-2.jpg" width="660" height="680" alt="Ice-Ink: a board of ice blocks under an aurora" loading="lazy"></div><figcaption>Ice-Ink</figcaption></figure>
-      <figure class="panel tall tilt-r"><div class="still kb"><img src="img/inkville-4.jpg" width="520" height="770" alt="Ink-Tar Hero: coloured notes falling down a five-lane track" loading="lazy"></div><figcaption>Ink-Tar Hero</figcaption></figure>
-      <figure class="panel"><div class="still kb2"><img src="img/inkville-3.jpg" width="600" height="400" alt="Dance Dance Ink: arrows rising on a stage" loading="lazy"></div><figcaption>Dance Dance Ink</figcaption></figure>
-      <figure class="panel"><div class="still kb"><img src="img/inkville-5.jpg" width="540" height="450" alt="Disc-Ink: a wooden disc table in the clouds" loading="lazy"></div><figcaption>Disc-Ink</figcaption></figure>
-      <span class="burst pop" aria-hidden="true"><span>8<small>GAMES</small></span></span>
-    </div>
-  </div>
-</article>
+  /* ── TOUCH AND MOUSE. A tap on a cartridge lights it; a tap on the lit one opens it (so does the button).
+     A mouse lights whatever it rests on, so one click opens. A sideways swipe anywhere steps to the next
+     cartridge. touch-action:none on the body keeps the browser's own swipe out of it. ── */
+  var px0 = 0, py0 = 0, downT = 0, pid = null, downSel = -1;
+  var booting = function () { return !!(window.odaIntro && window.odaIntro.on); };   /* the boot sheet is up: the shelves are not there yet */
+  function cartAt(x, y) {
+    var hit = document.elementsFromPoint(x, y).find(function (n) { return n.classList && n.classList.contains('cart'); });
+    return hit ? +hit.dataset.i : -1;
+  }
+  function onDown(e) {
+    if (booting()) return;
+    if (e.target.closest && e.target.closest('.go, #snd')) return;
+    askTilt();
+    pid = e.pointerId; px0 = e.clientX; py0 = e.clientY; downT = performance.now(); downSel = front;
+  }
+  function onUp(e) {
+    if (pid === null || e.pointerId !== pid) return;
+    pid = null;
+    var dx = e.clientX - px0, dy = e.clientY - py0;
+    if (Math.hypot(dx, dy) < 10 && performance.now() - downT < 500) {      /* a tap */
+      var i = cartAt(e.clientX, e.clientY);
+      if (i >= 0) { if (i === downSel) play(i); else select(i); }
+      return;
+    }
+    if (Math.abs(dx) > 36 && Math.abs(dx) > Math.abs(dy) * 1.3) select(front + (dx < 0 ? 1 : -1));   /* a swipe */
+  }
+  addEventListener('pointerdown', onDown);
+  addEventListener('pointerup', onUp);
+  addEventListener('pointercancel', function () { pid = null; });
+  addEventListener('pointerover', function (e) {
+    if (e.pointerType !== 'mouse' || booting() || pid !== null) return;
+    var c = e.target.closest && e.target.closest('.cart'); if (c) select(+c.dataset.i);
+  });
+  document.addEventListener('touchmove', function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false });
+  var wheelT = 0;
+  addEventListener('wheel', function (e) {                       /* a trackpad or mouse wheel steps along too */
+    if (booting()) return;
+    var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY, t = performance.now();
+    if (Math.abs(d) < 8 || t - wheelT < 260) return;
+    wheelT = t; select(front + (d > 0 ? 1 : -1));
+  }, { passive: true });
+  document.addEventListener('keydown', function (e) {
+    if (!N) return;
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); select(front - 1); }
+    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); select(front + 1); }
+    else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { e.preventDefault(); vert(-1); }
+    else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { e.preventDefault(); vert(1); }
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); play(front); }
+  });
 
-<div class="zip" data-dir="1" aria-hidden="true"><span>NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUNATIDE <b>&#9733;</b> </span></div>
+  /* ── THE MUSIC: Odaroo's own track, looping under the arcade. A browser will not play sound before the
+     visitor's first touch, so it is asked for at once (allowed where the site has been visited before) and
+     again on the first tap, key or wheel; it fades in, rests when the tab is hidden, and a choice to turn
+     it off is remembered. ── */
+  var bgm = $('bgm'), MUTE_KEY = 'odaroo.arcade.mute', muted = false, fadeIv = 0;
+  /* ⭐ 2026-10-17 — THE SONG STARTS WITH THE ODAROO & CO. SQUARES, from 0:00 (Odaroo: "you have the song starting.
+     The Odaroo animation starts as well at the same time, so that way it gives it time to load"). It is asked
+     for right here, as the page opens; preload=auto is only a hint a phone may ignore. */
+  try { if (bgm.networkState === 0 || (bgm.networkState === 1 && bgm.readyState === 0)) bgm.load(); } catch (e) {}   /* empty, or idle with nothing fetched (preload ignored) — never while it is already loading */
+  try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch (e) {}
+  function sndUI() { $('snd').classList.toggle('off', muted); $('snd').setAttribute('aria-label', muted ? 'Music on' : 'Music off'); }
+  function fadeTo(v, then) {
+    clearInterval(fadeIv);
+    fadeIv = setInterval(function () {
+      var d = v - bgm.volume, st = 0.04;
+      if (Math.abs(d) <= st) { bgm.volume = v; clearInterval(fadeIv); if (then) then(); } else bgm.volume = Math.max(0, Math.min(1, bgm.volume + (d > 0 ? st : -st)));
+    }, 60);
+  }
+  var BGM_VOL = 0.5;
+  function musicOn() {
+    if (muted || document.hidden || !bgm.paused) return;
+    bgm.volume = 0; var p = bgm.play();
+    if (p && p.then) p.then(function () { fadeTo(BGM_VOL); }).catch(function () {});
+  }
+  function musicOff() { fadeTo(0, function () { bgm.pause(); }); }
+  /* ⭐ 2026-10-13 — while the boot sheet waits for its tap there is no song: the tap on the cartridge
+     starts it (odaMusicOn, called by the boot), exactly like the games' title songs */
+  window.odaMusicOn = musicOn;
+  sndUI(); musicOn();                                    /* with the squares, from the top */
+  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) { addEventListener(ev, function first() { musicOn(); }, { passive: true, capture: true }); });
+  $('snd').addEventListener('pointerdown', function (e) { e.stopPropagation(); }, true);
+  $('snd').addEventListener('click', function (e) {
+    e.stopPropagation(); muted = !muted; sndUI();
+    try { localStorage.setItem(MUTE_KEY, muted ? '1' : '0'); } catch (x) {}
+    if (muted) musicOff(); else musicOn();
+  });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { if (!bgm.paused) bgm.pause(); } else musicOn(); });
+  addEventListener('pagehide', function () { bgm.pause(); });
 
-<!-- LUNATIDE -->
-<article class="spread flip-side" id="lunatide" style="--c:#7fd4ff;--cd:#1c6fa8">
-  <div class="spread-cart">
-    <div class="cartstage"><div class="cart3d" data-slug="lunatide" data-title="LUNATIDE" data-scroll></div></div>
-    <a class="btn play" href="https://play.odaroo.co/lunatide/">Play Lunatide <span aria-hidden="true">▶</span></a>
-    <dl class="specs">
-      <div><dt>Visions</dt><dd>5, plus 1 secret</dd></div>
-      <div><dt>To find</dt><dd>150 stones, 6 shards a stage</dd></div>
-      <div><dt>Saves</dt><dd>3 files</dd></div>
-      <div><dt>Plays on</dt><dd>Touch, keys, controller, VR</dd></div>
-    </dl>
-  </div>
-  <div class="spread-body">
-    <p class="folio">2.5D platformer</p>
-    <h2 class="title">Lunatide</h2>
-    <p class="deck">A dream-wind platformer under a tidal moon.</p>
-    <div class="cols">
-      <p class="dropcap">Binky runs, jumps and flutters through a moonlit dream with a Wind Ring in hand. Fire the ring to catch a creature, carry it, throw it, or spring off it for a double jump.</p>
-      <p>Five Visions are played in order: the quay of Moonlit Harbor, the Moonpetal Garden, the two-world Looking-Glass, a board run down Moonwake Slide and a boss in the Jester's Ring. Each stage hides 150 dream stones and six Moon Shards.</p>
-      <p>Find everything and a sixth Vision rises on the world map. It also plays offline, and in a headset the whole dream wraps around you.</p>
-    </div>
-    <div class="panels p-luna">
-      <figure class="panel wide"><div class="still kb"><img src="img/lunatide-1.jpg" width="1100" height="619" alt="Lunatide title screen over a moonlit harbor" loading="lazy"></div><figcaption>Moonlit Harbor</figcaption></figure>
-      <figure class="panel wide flip" style="--n:3"><div class="still">
-        <img src="img/lunatide-2.jpg" width="900" height="506" alt="Binky beside a glowing checkpoint in a village of paper houses" loading="lazy" style="--k:0">
-        <img src="img/lunatide-3.jpg" width="900" height="506" alt="" loading="lazy" style="--k:1"><img src="img/lunatide-4.jpg" width="900" height="506" alt="" loading="lazy" style="--k:2">
-      </div><figcaption>Ring the bell</figcaption></figure>
-      <figure class="panel tilt-l flip" style="--n:2"><div class="still">
-        <img src="img/lunatide-5.jpg" width="900" height="506" alt="Binky faces a small orange creature" loading="lazy" style="--k:0"><img src="img/lunatide-6.jpg" width="900" height="506" alt="" loading="lazy" style="--k:1">
-      </div><figcaption>Catch it. Throw it.</figcaption></figure>
-      <figure class="panel tilt-r"><div class="still kb2"><img src="img/lunatide-7.jpg" width="900" height="506" alt="Binky leaps toward a winged gold ring" loading="lazy"></div><figcaption>Star Hook ahead</figcaption></figure>
-      <span class="burst pop" aria-hidden="true"><span>VR<small>MODE</small></span></span>
-    </div>
-  </div>
-</article>
+  /* ── THE LEAN: eases the wall toward the tilt, and rests once it is there (nothing runs while the page is still) ── */
+  var last = performance.now(), running = false;
+  function kick() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(tick); } }
+  function tick(t) {
+    var dt = Math.min(0.05, (t - last) / 1000); last = t;
+    tilt.x += (tilt.tx - tilt.x) * Math.min(1, dt * 4); tilt.y += (tilt.ty - tilt.y) * Math.min(1, dt * 4);
+    $('orbit').style.transform = 'translate3d(' + (tilt.x * 8).toFixed(1) + 'px,' + (tilt.y * 6).toFixed(1) + 'px,0)';
+    if (Math.abs(tilt.tx - tilt.x) < 0.004 && Math.abs(tilt.ty - tilt.y) < 0.004) { running = false; return; }
+    requestAnimationFrame(tick);
+  }
 
-<!-- THE VR WING -->
-<div class="wing"><span>The VR wing</span><i>Two cartridges that go on your head</i></div>
+  fetch(BARE ? 'https://play.odaroo.co/games.json' : 'games.json', { cache: 'no-cache' }).then(function (r) { return r.json(); })
+    .then(function (list) { build(Array.isArray(list) && list.length ? list : FALLBACK); })
+    .catch(function () { build(FALLBACK); });
 
-<!-- VR LABS -->
-<article class="spread" id="vrlabs" style="--c:#b79bff;--cd:#5b3fc4">
-  <div class="spread-cart">
-    <div class="cartstage"><div class="cart3d" data-slug="vrlabs" data-title="VR LABS" data-scroll></div></div>
-    <a class="btn play" href="https://play.odaroo.co/vrlabs/">Enter VR Labs <span aria-hidden="true">▶</span></a>
-    <dl class="specs">
-      <div><dt>Inside</dt><dd>3 games, 1 hub</dd></div>
-      <div><dt>Headsets</dt><dd>Any WebXR browser</dd></div>
-      <div><dt>Hands</dt><dd>Grip, trigger, flick</dd></div>
-      <div><dt>No headset</dt><dd>Opens flat on a screen</dd></div>
-    </dl>
-  </div>
-  <div class="spread-body">
-    <p class="folio">Virtual reality · WebXR</p>
-    <h2 class="title">VR Labs</h2>
-    <p class="deck">Put on a headset: a lab of VR games you pick up with your hands.</p>
-    <div class="cols">
-      <p class="dropcap">One page, one headset, three experiments. The Lab is a room you stand in. Pick up a cartridge, push it into the console, and the room fades into a game.</p>
-      <p><b>Moonrun</b> is a first-person dream run from Lunatide: rooftops, wall-runs and a ghost of your best time. <b>Moonstone Toss</b> is a throwing gallery under the pines. <b>Glove Range</b> hands you gravity gloves: point, hold the grip and flick, and the target flies to your palm.</p>
-      <p>Home is always on your left wrist.</p>
-    </div>
-    <div class="panels p-vr">
-      <figure class="panel wide"><div class="still kb"><img src="img/vrlabs-1.jpg" width="1100" height="688" alt="The VR Labs hub: three pedestals under a huge moon" loading="lazy"></div><figcaption>Insert a game</figcaption></figure>
-      <figure class="panel tilt-l"><div class="still kb2"><img src="img/vrlabs-2.jpg" width="1100" height="688" alt="Moonstone Toss: glowing stones on a table facing a hoop" loading="lazy"></div><figcaption>Moonstone Toss</figcaption></figure>
-      <figure class="panel tilt-r"><div class="still kb"><img src="img/vrlabs-3.jpg" width="1100" height="688" alt="Glove Range: paper lanterns floating in front of the moon" loading="lazy"></div><figcaption>Glove Range</figcaption></figure>
-      <figure class="panel wide"><div class="still kb2"><img src="img/vrlabs-4.jpg" width="1100" height="688" alt="Moonrun title card with its list of moves" loading="lazy"></div><figcaption>Moonrun</figcaption></figure>
-    </div>
-  </div>
-</article>
-
-<div class="zip" data-dir="-1" aria-hidden="true"><span>NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> NEXT CARTRIDGE &#9654; LUSOLAOS <b>&#9733;</b> </span></div>
-
-<!-- LUSOLAOS -->
-<article class="spread flip-side" id="lusolaos" style="--c:#7fb0ff;--cd:#1f4fa3">
-  <div class="spread-cart">
-    <div class="cartstage"><div class="cart3d" data-slug="lusolaos" data-title="LUSOLAOS" data-scroll></div></div>
-    <a class="btn play" href="https://play.odaroo.co/lusolaos/">Play Lusolaos <span aria-hidden="true">▶</span></a>
-    <dl class="specs">
-      <div><dt>Rivers</dt><dd>12 stages, daily, endless</dd></div>
-      <div><dt>Sound</dt><dd>4 layers, a switch each</dd></div>
-      <div><dt>Immersive</dt><dd>3D, VR and AR</dd></div>
-      <div><dt>Pressure</dt><dd>None</dd></div>
-    </dl>
-  </div>
-  <div class="spread-body">
-    <p class="folio">Puzzle · VR and AR inside</p>
-    <h2 class="title">Lusolaos</h2>
-    <p class="deck">A river of painted tiles, from the Atlantic to the Mekong. Turn, swap, breathe.</p>
-    <div class="cols">
-      <p class="dropcap">Tap a tile to turn it, drag one to swap it, and lead the water from the spring to the sea. Twelve named stages alternate between the Açores and Laos, painted in cobalt on tin-white like the tiles of São Miguel.</p>
-      <p>There are no stars, no par and no move counter. A stage is simply complete. A new river arrives every day, and an endless one waits after the last stage.</p>
-      <p>The sound comes in four layers with a switch each: music, nature, effects and binaural beats in three tunings. In Settings, Immersive hangs the wall in front of you in VR, or over your own room in AR.</p>
-    </div>
-    <div class="panels p-luso">
-      <figure class="panel wide"><div class="still kb"><img src="img/lusolaos-1.jpg" width="1100" height="688" alt="Lusolaos title over a sunset bay" loading="lazy"></div><figcaption>Açores · Laos</figcaption></figure>
-      <figure class="panel wide flip slow" style="--n:4"><div class="still">
-        <img src="img/lusolaos-2.jpg" width="1100" height="688" alt="A wall of blue and white river tiles over a crater lake" loading="lazy" style="--k:0">
-        <img src="img/lusolaos-3.jpg" width="1100" height="688" alt="" loading="lazy" style="--k:1"><img src="img/lusolaos-4.jpg" width="1100" height="688" alt="" loading="lazy" style="--k:2"><img src="img/lusolaos-5.jpg" width="1100" height="688" alt="" loading="lazy" style="--k:3">
-      </div><figcaption>Four rivers, four skies</figcaption></figure>
-      <span class="burst pop" aria-hidden="true"><span>AR<small>+ VR</small></span></span>
-    </div>
-  </div>
-</article>
-
-<div class="zip" data-dir="1" aria-hidden="true"><span>NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> NEXT CARTRIDGE &#9654; CHROME ANIMALS <b>&#9733;</b> </span></div>
-
-<!-- CHROME ANIMALS -->
-<article class="spread dark" id="chromeanimals" style="--c:#ff2a6d;--cd:#ff2a6d">
-  <div class="spread-cart">
-    <div class="cartstage"><div class="cart3d" data-slug="chromeanimals" data-title="CHROME" data-scroll></div></div>
-    <a class="btn play" href="https://play.odaroo.co/chromeanimals/">Play Chrome Animals <span aria-hidden="true">▶</span></a>
-    <dl class="specs">
-      <div><dt>Rated</dt><dd>18+</dd></div>
-      <div><dt>Modes</dt><dd>Story, Night Shift, Editor</dd></div>
-      <div><dt>Soundtrack</dt><dd>12 songs, with a sound test</dd></div>
-      <div><dt>At the door</dt><dd>A PIN</dd></div>
-    </dl>
-  </div>
-  <div class="spread-body">
-    <p class="folio">Top-down action · Adults only</p>
-    <h2 class="title">Chrome Animals</h2>
-    <p class="deck">A neon-noir massacre. One hit kills. Pick a mask.</p>
-    <div class="cols">
-      <p class="dropcap">One hit kills, both ways. Four story chapters climb through a neon city to Dr. Halcyon. Night Shift is a ten-minute arcade run on a daily seed. The level editor turns your own floor into a share code.</p>
-      <p>Every line of English carries its Japanese underneath. The twelve-song soundtrack has its own player on the title menu, CHROME AMP. All of the art and all of the music are generated in code.</p>
-    </div>
-    <div class="panels p-chrome">
-      <figure class="panel wide flip slow" style="--n:2"><div class="still">
-        <img src="img/chrome-1.jpg" width="1100" height="619" alt="Chrome Animals title: a pixel wolf mask before a setting sun" loading="lazy" style="--k:0"><img src="img/chrome-2.jpg" width="1100" height="619" alt="" loading="lazy" style="--k:1">
-      </div><figcaption>Pick a mask</figcaption></figure>
-      <figure class="panel wide"><div class="still kb2"><img src="img/chrome-3.jpg" width="900" height="506" alt="A dark apartment with an answering machine message" loading="lazy"></div><figcaption>One new message</figcaption></figure>
-      <span class="burst pop" aria-hidden="true"><span>18<small>PLUS</small></span></span>
-    </div>
-  </div>
-</article>
-
-<div class="zip" data-dir="-1" aria-hidden="true"><span>LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> LAST CARTRIDGE &#9654; EDGEWORK <b>&#9733;</b> </span></div>
-
-<!-- EDGEWORK -->
-<article class="spread dark flip-side" id="edgework" style="--c:#e1061b;--cd:#ff3b4d">
-  <div class="spread-cart">
-    <div class="cartstage"><div class="cart3d" data-slug="edgework" data-title="EDGEWORK" data-scroll></div></div>
-    <a class="btn play" href="https://play.odaroo.co/edgework/">Play Edgework <span aria-hidden="true">▶</span></a>
-    <dl class="specs">
-      <div><dt>Rated</dt><dd>16+</dd></div>
-      <div><dt>A run</dt><dd>8 nights, one clock</dd></div>
-      <div><dt>Lives</dt><dd>3 cuts, no retry</dd></div>
-      <div><dt>Ranks</dt><dd>Worldwide board</dd></div>
-    </dl>
-  </div>
-  <div class="spread-body">
-    <p class="folio">Puzzle · Speedrun</p>
-    <h2 class="title">Edgework <span lang="ja">刃渡り</span></h2>
-    <p class="deck">Eight nights of thin blades over a red seal. Never touch an edge.</p>
-    <div class="cols">
-      <p class="dropcap">Every night hides a red seal under a pile of spring-loaded blades. Slide a blade by its blue grip and hold it there. Let go and it snaps home. Press the seal to clear the night.</p>
-      <p>Touch an edge and you are cut. The night starts over, and the third cut of a run is game over, with no retry. All eight nights are one run against the clock, ranked on a worldwide board.</p>
-      <p>The holds add up: one blade on the first night, four on the last, plus the finger that presses. Bring both hands, or a friend.</p>
-    </div>
-    <div class="panels p-edge">
-      <figure class="panel tall tilt-l"><div class="still kb"><img src="img/edgework-1.jpg" width="680" height="800" alt="Edgework rules card in red and black Japanese type" loading="lazy"></div><figcaption>The rules</figcaption></figure>
-      <figure class="panel tall tilt-r flip slow" style="--n:4"><div class="still">
-        <img src="img/edgework-2.jpg" width="680" height="800" alt="One blade over the seal on the first night" loading="lazy" style="--k:0">
-        <img src="img/edgework-3.jpg" width="680" height="800" alt="" loading="lazy" style="--k:1"><img src="img/edgework-4.jpg" width="680" height="800" alt="" loading="lazy" style="--k:2"><img src="img/edgework-5.jpg" width="680" height="800" alt="" loading="lazy" style="--k:3">
-      </div><figcaption>Night 1 → Night 8</figcaption></figure>
-      <span class="burst pop" aria-hidden="true"><span>斬<small>3 CUTS</small></span></span>
-    </div>
-  </div>
-</article>
-
-<div class="zip" data-dir="1" aria-hidden="true"><span>THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> THANKS FOR PLAYING &#9654; ODAROO &amp; CO. <b>&#9733;</b> </span></div>
-
-<!-- ───────── BACK PAGE ───────── -->
-<footer class="back">
-  <div class="back-logo" aria-hidden="true">
-    <span class="tile inv">O</span><span class="tile">D</span><span class="tile">A</span><span class="tile">R</span><span class="tile inv">O</span><span class="tile">O</span><span class="tile">&amp;</span><span class="tile">C</span><span class="tile inv">O<i>.</i></span>
-  </div>
-  <div class="back-cols">
-    <div><h4>The rack</h4>
-      <a href="https://play.odaroo.co/inkville/">Inkville</a><a href="https://play.odaroo.co/lunatide/">Lunatide</a><a href="https://play.odaroo.co/vrlabs/">VR Labs</a>
-      <a href="https://play.odaroo.co/lusolaos/">Lusolaos</a><a href="https://play.odaroo.co/chromeanimals/">Chrome Animals</a><a href="https://play.odaroo.co/edgework/">Edgework</a></div>
-    <div><h4>The scene</h4>
-      <a href="https://www.youtube.com/@whoisodaroo" rel="noopener">YouTube</a><a href="https://www.twitch.tv/odaroo" rel="noopener" data-twitch>Twitch</a>
-      <a href="https://odaroo.bandcamp.com/" rel="noopener">Bandcamp</a><a href="https://discord.gg/ENY6PbKT7f" rel="noopener">Discord</a></div>
-    <div><h4>The arcade</h4><a href="https://play.odaroo.co/">play.odaroo.co</a><a href="#top">Back to the front page ▲</a></div>
-  </div>
-  <p class="colophon">© 2026 Odaroo &amp; Co. Every game, drawing and song in this paper is an original. Printed on pixels.</p>
-</footer>
-
-</div><!-- /sheet -->
-<script src="paper.js?v=3"></script>
+})();
+</script>
 </body>
 </html>
