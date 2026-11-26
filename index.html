@@ -509,8 +509,8 @@
     return k < 0 ? [t, ''] : [t.slice(0, k), t.slice(k + 1)];
   }
   /* THE LOOPS BEHIND (art/loop-<slug>.mp4): only the cartridges listed here have one. A square, silent, 5-10 second
-     film that loops without a seam (tools/arcade-rec/loops.mjs makes the games'). */
-  var LOOPS = ['youtube', 'bandcamp', 'discord', 'inkville', 'lunatide', 'chromeanimals', 'vrlabs', 'lusolaos', 'edgework'];
+     film that loops without a seam (tools/arcade-rec/loops.mjs makes the games', outlet-loops.mjs Twitch's and SoundCloud's). */
+  var LOOPS = ['youtube', 'twitch', 'bandcamp', 'soundcloud', 'discord', 'inkville', 'lunatide', 'chromeanimals', 'vrlabs', 'lusolaos', 'edgework'];
   /* THE BOTTOM SHELF: the games in the order they were made, Inkville first and Edgework last. games.json (the
      server) already lists them that way; this is the same list for a page opened with no server behind it. */
   var FALLBACK = [
