@@ -228,7 +228,7 @@
   #glitch i { position: absolute; left: 0; right: 0; height: 9%; background: linear-gradient(#fff0, color-mix(in srgb, var(--c) 38%, #fff0), #fff0); animation: gbar 0.9s linear infinite; }
   #glitch i + i { height: 4%; animation-duration: .55s; animation-direction: reverse; background: linear-gradient(#fff0, #ffffff40, #fff0); }
   @keyframes gbar { from { translate: 0 -20vh; } to { translate: 0 120vh; } }
-  #glitch b { position: absolute; inset: 0; background: #fff; opacity: 0; animation: gflash 2.4s steps(1) both; }
+  #glitch b { position: absolute; inset: 0; background: #fff; opacity: 0; animation: gflash 1.2s steps(1) both; }   /* as long as GLITCH_MS */
   @keyframes gflash { 0%, 6% { opacity: .5; } 7%, 30% { opacity: 0; } 31% { opacity: .18; } 33%, 61% { opacity: 0; } 62% { opacity: .25; } 64%, 100% { opacity: 0; } }
   body.glitch #orbit, body.glitch #info, body.glitch #deck { animation: gtear .34s steps(1) infinite; }
   body.glitch #info { animation-duration: .27s; animation-delay: -.11s; }
@@ -472,8 +472,8 @@
 <video id="bg" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video><div id="shade"></div>
 <main id="orbit">
   <div id="mast"><div id="mark" role="img" aria-label="Odaroo &amp; Co."><b class="o">O</b><b>D</b><b>A</b><b>R</b><b class="o">O</b><b>O</b><b>&amp;</b><b>C</b><b class="o">O<u>.</u></b></div><i>Artist &middot; video, live, music, games</i></div>
-  <section class="shelf" aria-label="Where to find Odaroo"><h2>The outlets</h2><div class="row" id="rowOut"></div></section>
-  <section class="shelf" aria-label="The games, oldest first"><h2>The games</h2><div class="row" id="rowGames"></div></section>
+  <section class="shelf" aria-label="Where to find Odaroo"><h2>Socials</h2><div class="row" id="rowOut"></div></section>
+  <section class="shelf" aria-label="The games, oldest first"><h2>Media</h2><div class="row" id="rowGames"></div></section>
 </main>
 <div id="info"></div>
 <!-- the back of the handheld, top edge only: body, the cartridge bay (.bay), grip ridges, two screws. the Japanese sign and the glove over the bay (#hint). -->
@@ -665,7 +665,7 @@
      let go over the handheld (or thrown well down toward it) and load() seats it in the bay, the picture tears for
      GLITCH_MS as if connecting, collapses, and play() opens the link. Let go anywhere else and it flies home.
      Enter / A on a controller does the same thing by itself, so the page still works with no touch. ── */
-  var held = null, heldI = -1, loading = false, GLITCH_MS = 2400;
+  var held = null, heldI = -1, loading = false, GLITCH_MS = 1200;   /* 2026-11-26 (night): half as long (Odaroo: "same animation… but it doesn't last as long"), every cartridge; gflash in the CSS is the same length */
   function chime(k) { try { if (window.odaIntro && window.odaIntro.chime) window.odaIntro.chime(k); } catch (e) {} }
   function rectOf(el) { var r = el.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; }
   function pick(i) {                             /* lift cartridge i off the shelf */
