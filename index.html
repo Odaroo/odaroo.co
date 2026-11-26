@@ -99,12 +99,12 @@
 
   /* the wall: the name, then the two shelves. It leans a few pixels with the phone's tilt (or the mouse). */
   #orbit { position: relative; z-index: 2; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; align-items: center;
-           justify-content: center; gap: clamp(6px, 1.8dvh, 22px); will-change: transform;
+           justify-content: center; gap: clamp(6px, 1.2dvh, 22px); will-change: transform;
            padding: max(14px, calc(env(safe-area-inset-top) + 8px)) 22px 0; }
   /* ⭐ 2026-11-26 (later) — THE MARK, NOT THE WORD (Odaroo: "completely remove the Odaroo. Just put Odaroo & Co., the
      logo, on top"). The nine tiles O D A / R O O / & C O. as the boot leaves them (the O diagonal lit), small and still. */
-  #mast { text-align: center; line-height: 1; margin-bottom: clamp(4px, 1.6dvh, 18px); }
-  #mark { --mt: clamp(24px, 5.2dvh, 42px); display: inline-grid; grid-template-columns: repeat(3, var(--mt)); grid-auto-rows: var(--mt);
+  #mast { text-align: center; line-height: 1; margin-bottom: clamp(4px, 1dvh, 18px); }
+  #mark { --mt: clamp(22px, 4.6dvh, 42px); display: inline-grid; grid-template-columns: repeat(3, var(--mt)); grid-auto-rows: var(--mt);
           gap: calc(var(--mt) * .14); font-family: 'ODPixel', 'Courier New', monospace; }
   #mark b { position: relative; box-sizing: border-box; display: flex; align-items: center; justify-content: center; background: #0d1018;
             border: max(1px, calc(var(--mt) * .08)) solid #eef2f8; color: #eef2f8; font-weight: 400; font-size: calc(var(--mt) * .48); line-height: 1; }
@@ -165,7 +165,7 @@
      redirect… Don't have anything that says drag and drop. Make it intuitive"). Only its top edge and cartridge bay
      show, rising from the foot of the screen. NO WORDS, no arrow: the bay breathes, and brightens while a cartridge
      is being carried. Drawn with square corners on purpose (the cartridges are pixel shells). */
-  #deck { position: relative; z-index: 3; flex: 0 0 auto; height: var(--deck); display: flex; justify-content: center; margin-top: clamp(20px, 3.4dvh, 30px);
+  #deck { position: relative; z-index: 3; flex: 0 0 auto; height: var(--deck); display: flex; justify-content: center; margin-top: calc(var(--deck) * .46 + clamp(26px, 4dvh, 40px));
           padding-bottom: env(safe-area-inset-bottom); }
   #deck svg { display: block; height: 100%; width: auto; aspect-ratio: 220 / 96; overflow: visible; fill: none; stroke: #f4f8ff; stroke-width: 3;
               stroke-linejoin: miter; shape-rendering: crispEdges; filter: drop-shadow(0 0 5px #bfe6ffaa); opacity: .8; transition: opacity .25s; }
@@ -178,8 +178,12 @@
   /* IN THE HAND IT IS A SOLID THING (Odaroo, 2026-11-26: "the cartridge turns into 3D as you press and hold it"): the
      same picture stacked nine deep (.box b = the darker copies behind, 2px apart), tipped back and turned; it leans
      with the direction it is carried (--rx/--ry, set by moveHeld) and goes flat again as it enters the bay. */
-  #held .box { position: absolute; inset: 0; transform-style: preserve-3d; transform: perspective(520px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-               transition: transform .22s cubic-bezier(.3, .9, .3, 1); }
+  #held .box { position: absolute; inset: 0; transform-style: preserve-3d; transform: perspective(520px) scale(var(--lift, 1)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+               transition: transform .24s cubic-bezier(.2, 1.4, .4, 1); }
+  /* ⭐ 2026-11-26 (evening) — PICKED UP, IT COMES TOWARD YOU (Odaroo: "as you're picking up the cartridge, the cartridge
+     gets closer to you, so press and hold, and then you have the drag and drop"). --lift grows the solid cartridge by
+     LIFT (moveHeld sets it while it is carried) and its glow widens; it is 1 again on the way home or into the bay. */
+  #held.up img.face { filter: drop-shadow(0 0 20px var(--gc, #fff)) drop-shadow(0 14px 16px #000c); }
   #held img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; image-rendering: pixelated; }
   #held img.side { filter: brightness(.42); }
   #held img.face { filter: drop-shadow(0 0 12px var(--gc, #fff)); }
@@ -187,13 +191,17 @@
      Japanese equivalent of drag and drop here. Don't include any English wording"). This REVERSES the same day's "no
      words, no arrow": Japanese only, and the glove. It bobs on its own HTML box (translate), never inside the svg. */
   @font-face { font-family: 'ODHint'; src: url('fonts/DotGothic16-hint.woff2') format('woff2'); font-display: swap; }
-  #hint { position: absolute; left: 50%; bottom: calc(env(safe-area-inset-bottom) + var(--deck) * .06); width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  /* ⭐ 2026-11-26 (evening) — THE GLOVE IS ABOVE THE CONSOLE NOW, NOT IN IT (Odaroo: "put it above the actual console so we
+     see that we have to drag and drop. Some people didn't know… too complicated for the non-gamer… on top of the console,
+     pointing down and animated"). It stands over the bay with the sign over it, and PRESSES DOWN toward the bay and
+     comes back, again and again (hintBob). #deck's margin-top is the room it stands in. */
+  #hint { position: absolute; left: 50%; bottom: calc(env(safe-area-inset-bottom) + var(--deck) + 5px); width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
           pointer-events: none; transition: opacity .25s; }
   #hint span { white-space: nowrap; font-family: 'ODHint', 'DotGothic16', sans-serif; font-size: clamp(11px, 1.9dvh, 15px); letter-spacing: .12em;
-               color: #f4f8ff; text-shadow: 0 0 6px #bfe6ffaa, 0 0 2px #000, 0 1px 0 #000; position: absolute; bottom: calc(var(--deck) * .94 + 4px); }
-  #hint svg { display: block; height: calc(var(--deck) * .6); width: auto; aspect-ratio: 48 / 66; overflow: visible; animation: hintBob 1.1s ease-in-out infinite; }
-  @keyframes hintBob { 0%, 100% { translate: 0 -3px; } 50% { translate: 0 4px; } }
-  body.carry #hint svg { animation-duration: .5s; }
+               color: #f4f8ff; text-shadow: 0 0 6px #bfe6ffaa, 0 0 2px #000, 0 1px 0 #000; margin-bottom: 9px; }
+  #hint svg { display: block; height: calc(var(--deck) * .46); width: auto; aspect-ratio: 48 / 66; overflow: visible; animation: hintBob 1.5s cubic-bezier(.5, 0, .3, 1) infinite; }
+  @keyframes hintBob { 0%, 100% { translate: 0 -5px; } 42%, 58% { translate: 0 calc(var(--deck) * .17); } }
+  body.carry #hint svg { animation-duration: .75s; }
   body.glitch #hint, body.gone #hint, body.ringwait #hint { opacity: 0; }
   #held.back, #held.seat { transition: transform .26s cubic-bezier(.3, .9, .3, 1), opacity .26s; }
   #held.sunk { transition: transform .34s cubic-bezier(.5, 0, .9, .4); }
@@ -236,6 +244,20 @@
   }
   body.gone #orbit, body.gone #info, body.gone #deck, body.gone #bg, body.gone #held { animation: gout .42s cubic-bezier(.7, 0, 1, .5) forwards; }
   @keyframes gout { 0% { scale: 1 1; opacity: 1; } 70% { scale: 1.04 .012; opacity: 1; } 100% { scale: 0 .004; opacity: 0; } }
+  /* ⭐ 2026-11-26 (evening) — AN UPRIGHT PHONE: THE CARTRIDGES ARE THE BIG THING (Odaroo: "much more grandiose on the
+     computer… in the handheld it looks so much smaller. I have to zoom in"; asked which, he chose bigger cartridges and
+     words, paid for by a smaller mark and no "Artist · video, live…" line). Upright only: the sideways and desktop
+     page keeps the big mark. The outlets are as wide as five across allows; the games get the height that was freed. */
+  @media (max-aspect-ratio: 999/1000) {
+    :root { --oc: min(calc((100vw - 24px - 4 * var(--gap)) / 5), 11.4dvh, 132px);
+            --gz: min(calc((100vw - 44px - 2 * var(--gap)) / 3), 12.6dvh, 150px); }
+    #orbit { padding-left: 12px; padding-right: 12px; }
+    #info { padding-top: clamp(2px, .6dvh, 16px); }
+    #deck { margin-top: calc(var(--deck) * .46 + clamp(30px, 4.6dvh, 46px)); }
+    #mast i { display: none; }
+    #mark { --mt: clamp(16px, 3dvh, 30px); }
+    .tag { font-size: clamp(19px, 5.4vw, 26px); }
+  }
   /* a short screen (a phone on its side): the words step back so both shelves and the handheld still fit */
   @media (max-height: 540px) {
     #mast i, .kind { display: none; }
@@ -635,21 +657,23 @@
     held._lx = r.x; held._ry = -24;
     held._home = r; moveHeld(r.x, r.y, 1);
     document.body.appendChild(held); c.classList.add('away'); document.body.classList.add('carry');
+    held.getBoundingClientRect();                /* it is drawn once at its shelf size, so the lift toward you is SEEN */
     return held;
   }
+  var LIFT = 1.42;                               /* how much closer a carried cartridge comes (2026-11-26, evening) */
   function lean(rx, ry) { held.style.setProperty('--rx', rx.toFixed(1) + 'deg'); held.style.setProperty('--ry', ry.toFixed(1) + 'deg'); }
   function moveHeld(x, y, sc) {
     if ((sc || 1) > 1 && !held._flat) {                         /* carried: it turns toward the way it is going */
       var dx = x - (held._lx == null ? x : held._lx); held._lx = x;
       held._ry = Math.max(-38, Math.min(38, held._ry * 0.86 + dx * 1.5)); if (Math.abs(held._ry) < 14) held._ry += held._ry < 0 ? -1.2 : 1.2;
-      lean(20, held._ry);
-    } else lean(0, 0);
+      lean(20, held._ry); held.style.setProperty('--lift', LIFT); held.classList.add('up');
+    } else { lean(0, 0); held.style.setProperty('--lift', 1); held.classList.remove('up'); }
     held._x = x; held._y = y; held.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) scale(' + (sc || 1) + ')';
   }
   function drop() {                              /* not in the handheld: back to its place on the shelf */
     var h = held, i = heldI; if (!h) return; held = null; heldI = -1;
     document.body.classList.remove('carry');
-    h.classList.add('back'); h.style.setProperty('--rx', '0deg'); h.style.setProperty('--ry', '0deg'); h.style.transform = 'translate3d(' + h._home.x.toFixed(1) + 'px,' + h._home.y.toFixed(1) + 'px,0) scale(1)';
+    h.classList.add('back'); h.classList.remove('up'); h.style.setProperty('--lift', 1); h.style.setProperty('--rx', '0deg'); h.style.setProperty('--ry', '0deg'); h.style.transform = 'translate3d(' + h._home.x.toFixed(1) + 'px,' + h._home.y.toFixed(1) + 'px,0) scale(1)';
     setTimeout(function () { if (carts[i]) carts[i].classList.remove('away'); if (h.parentNode) h.parentNode.removeChild(h); }, 270);
   }
   function load(i) {                             /* into the bay, then the connection, then the link */
