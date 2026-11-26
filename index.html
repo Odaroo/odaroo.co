@@ -248,15 +248,34 @@
      computer… in the handheld it looks so much smaller. I have to zoom in"; asked which, he chose bigger cartridges and
      words, paid for by a smaller mark and no "Artist · video, live…" line). Upright only: the sideways and desktop
      page keeps the big mark. The outlets are as wide as five across allows; the games get the height that was freed. */
+  /* ⭐⭐ 2026-11-26 (night) — UPRIGHT, NOTHING IS CAPPED IN PIXELS ANY MORE (Odaroo, with a screenshot from his Fold: "it
+     still looks small on a handheld… it could be twice the size"). His phone's browser lays the page out ~958 CSS px
+     wide at 1x (a foldable is given the desktop-style viewport), so every "132px / 30px / 26px at most" cap turned the
+     page into a small island. Upright, every size below is a share of the screen (vw / dvh) with only a floor, so a
+     345-wide phone and a 958-wide one show the SAME picture. ⚠ Do not add a px maximum back in this block.
+     Also here: THE WORDS, THEN AIR, THEN THE SIGN + GLOVE + CONSOLE ("the description and the console at the bottom,
+     spaced out, so we see the hand is pointing down"): #deck's margin-top is the sign's room PLUS a clear gap (--air). */
   @media (max-aspect-ratio: 999/1000) {
-    :root { --oc: min(calc((100vw - 24px - 4 * var(--gap)) / 5), 11.4dvh, 132px);
-            --gz: min(calc((100vw - 44px - 2 * var(--gap)) / 3), 12.6dvh, 150px); }
-    #orbit { padding-left: 12px; padding-right: 12px; }
-    #info { padding-top: clamp(2px, .6dvh, 16px); }
-    #deck { margin-top: calc(var(--deck) * .46 + clamp(30px, 4.6dvh, 46px)); }
+    :root { --gap: max(6px, 1.6vw); --air: 3.4dvh;
+            --oc: min(calc((100vw - 24px - 4 * var(--gap)) / 5), 11dvh);
+            --gz: min(calc((100vw - 44px - 2 * var(--gap)) / 3), 11.1dvh);
+            --deck: max(46px, 12.5dvh); }
+    #orbit { padding-left: 12px; padding-right: 12px; gap: max(6px, 1.2dvh); }
+    .shelf { gap: max(5px, 1.2dvh); }
+    .shelf h2 { font-size: max(15px, min(4.3vw, 2.4dvh)); gap: 3.4vw; }
+    .kind { font-size: max(15px, min(4.3vw, 2.4dvh)); }
+    h1 { font-size: max(19px, min(6.2vw, 4.4dvh)); }
+    #info { padding: max(4px, 1.5dvh) 16px 0; }
+    #deck { margin-top: calc(var(--deck) * .6 + 1.9dvh * 1.2 + 9px + 5px + var(--air)); }
+    #hint span { font-size: max(11px, 1.9dvh); }
+    #hint svg { height: calc(var(--deck) * .6); }
     #mast i { display: none; }
-    #mark { --mt: clamp(16px, 3dvh, 30px); }
-    .tag { font-size: clamp(19px, 5.4vw, 26px); }
+    #mast { margin-bottom: max(4px, 1dvh); }
+    #mark { --mt: max(16px, 3dvh); }
+    .tag { font-size: max(19px, min(5.4vw, 3.4dvh)); }
+    #snd { width: max(40px, 11vw); height: max(40px, 11vw); }
+    #snd svg { width: 55%; height: 55%; }
+    #introLogo { --odct: max(32px, min(13.1vmin, 16vh)); }
   }
   /* a short screen (a phone on its side): the words step back so both shelves and the handheld still fit */
   @media (max-height: 540px) {
@@ -287,7 +306,7 @@
 #intro { --ibs: 1; position: fixed; inset: 0; z-index: 60; display: flex; background: #000; overflow: hidden; touch-action: none;
   align-items: center; justify-content: center; font-family: 'ODPixel', 'Courier New', monospace; }
 #intro::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .6s; background: repeating-linear-gradient(0deg, #0000 0 2px, #ffffff0d 2px 4px); }
-#intro:has(#introCard)::before { opacity: .6; }   /* pure black for the first three seconds; the scanlines come with the squares */
+#intro:has(#introCard)::before { opacity: .6; }   /* pure black for the first second; the scanlines come with the squares */
 #intro.fadeout { animation: introFade 1s ease-in forwards; pointer-events: none; }
 @keyframes introFade { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
 /* the boot column: cartridge, arrow, handheld, hint */
@@ -437,7 +456,9 @@
   /* ⭐ 2026-10-18 — THREE SECONDS OF BLACK FIRST (Odaroo: "the website starts all black for 3 seconds, and then you see
      the odaroo.co loading… the song's already started"). The song is asked for the moment the page opens (main
      script) and plays under the black; the squares land at 3s. */
-  IN.blackMs = 3000;
+  /* ⭐ 2026-11-26 (night) — ONE SECOND NOW (Odaroo: "I liked it at first, but now that I'm reloading and testing… make sure
+     that it's 1 second instead"). Only this number changed; the squares, chimes and the song under the black are the same. */
+  IN.blackMs = 1000;
   at(IN.blackMs, studio);
   /* a sound chip a browser kept asleep wakes on the first touch or key (the chimes after it are heard) */
   addEventListener('pointerdown', wake, true); addEventListener('pointerup', wake, true);
