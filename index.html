@@ -46,8 +46,14 @@
   /* the installed arcade takes the whole screen on a tap (a home-screen copy made before the manifest said
      "fullscreen" still shows the phone's bars until the phone refreshes it) — the games do the same */
   function odaFsOn() { return !!(document.fullscreenElement || document.webkitFullscreenElement) || matchMedia('(display-mode: fullscreen)').matches; }
+  /* ⭐ 2026-11-27 — THE PAGE ITSELF GOES FULL SCREEN ON ITS FIRST TAP, IN THE BROWSER TOO (Odaroo: "make sure the website turns
+     … in full screen, just like the other games"). This REVERSES "still no fullscreen for the arcade page itself" above.
+     Same rule as the games' app-shell.js: had it and lost it (Back, Esc) = not asked again on this load. */
+  var odaFsGot = false, odaFsDone = false;
+  function odaFsChange() { if (document.fullscreenElement || document.webkitFullscreenElement) odaFsGot = true; else if (odaFsGot) odaFsDone = true; }
+  document.addEventListener('fullscreenchange', odaFsChange); document.addEventListener('webkitfullscreenchange', odaFsChange);
   function odaGoFull() {
-    if (!ODA_APP || odaFsOn()) return;
+    if (odaFsDone || odaFsOn()) return;
     var d = document.documentElement, rq = d.requestFullscreen || d.webkitRequestFullscreen;
     if (rq) { try { var p = rq.call(d, { navigationUI: 'hide' }); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
   }
@@ -741,8 +747,18 @@
     setTimeout(function () { chime('coin'); document.body.classList.add('glitch'); }, 560);
     setTimeout(function () { chime('connect'); }, 560 + GLITCH_MS - 620);
     setTimeout(function () { document.body.classList.add('gone'); }, 560 + GLITCH_MS - 420);
-    setTimeout(function () { play(i); }, 560 + GLITCH_MS);
+    setTimeout(function () { play(i); left = true; setTimeout(function () { if (left && !wasHidden && !document.hidden) location.reload(); }, 12000); }, 560 + GLITCH_MS);
   }
+  /* ⭐ 2026-11-27 — BACK FROM A LINK ALWAYS FINDS THE PAGE AGAIN (Odaroo: "if you press back… you're not able to go back to the
+     website… like we have the Odaroo logo again, and then we have the games"). On a phone an outlet's link is often taken by
+     its APP: this page is never unloaded, it just sits behind the app, collapsed (body.gone) and deaf (`loading`). `pageshow`
+     in the head only covers a real page change. So: once play() has run, the page coming back into view starts it all over,
+     and if it never left view at all (the link was refused or cancelled) it starts over after 12s. */
+  var left = false, wasHidden = false;
+  document.addEventListener('visibilitychange', function () {
+    if (!left) return;
+    if (document.hidden) wasHidden = true; else if (wasHidden) location.reload();
+  });
 
   /* ── TILT: the phone leaning (or the mouse) leans the wall a few pixels ── */
   var tilt = { x: 0, y: 0, tx: 0, ty: 0 }, askedTilt = false;
